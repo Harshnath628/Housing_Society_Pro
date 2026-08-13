@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { LayoutGrid, Building2, Users, Receipt, CreditCard, Wallet, Bell, BarChart3, LogOut, Menu } from 'lucide-react';
-import { initialBuildings, initialFlats, initialResidents, initialBills, initialPayments, initialExpenses, initialNotices } from './data/mockData';
+import { supabase } from './lib/supabaseClient';
+import { signInAdmin, signUpAdmin, signOut, getMyProfile, createSociety, getResidentPortal, fetchAllData } from './lib/api';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Buildings = lazy(() => import('./pages/Buildings'));
@@ -33,25 +34,37 @@ const NAV_ITEMS = [
   { key: 'reports', label: 'Reports', icon: <BarChart3 {...ICON_PROPS} /> },
 ];
 
-function LoginPage({ onLogin }) {
+function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
   const [tab, setTab] = useState('admin');
+  const [adminMode, setAdminMode] = useState('signin');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [flatNumber, setFlatNumber] = useState('');
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (tab === 'admin') {
-      if (password === 'admin123') {
-        onLogin({ role: 'admin' });
+    setError('');
+    setBusy(true);
+    try {
+      if (tab === 'admin') {
+        if (adminMode === 'signin') {
+          await onAdminSignIn(email, password);
+        } else {
+          await onAdminSignUp(email, password);
+        }
       } else {
-        setError('Invalid password. Try: admin123');
+        const found = await onResidentLogin(flatNumber.toUpperCase());
+        if (!found) setError(`No flat registered with number "${flatNumber.toUpperCase()}"`);
       }
-    } else {
-      onLogin({ role: 'resident', flatNumber: flatNumber.toUpperCase() });
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -67,41 +80,134 @@ function LoginPage({ onLogin }) {
         {error && <div className="form-error" role="alert">{error}</div>}
         <form onSubmit={handleLogin}>
           {tab === 'admin' ? (
-            <div className="form-group">
-              <label>Password</label>
-              <input className="form-control" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter admin password" autoFocus />
-            </div>
+            <>
+              <div className="form-group">
+                <label>Email</label>
+                <input className="form-control" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@society.example" autoFocus />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input className="form-control" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={adminMode === 'signin' ? 'Enter admin password' : 'Choose a password (min 6 chars)'} />
+              </div>
+            </>
           ) : (
             <div className="form-group">
               <label>Flat Number</label>
-              <input className="form-control" value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101, B-101, C-101" autoFocus />
+              <input className="form-control" value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101" autoFocus />
             </div>
           )}
-          <button className="btn btn-primary" type="submit" style={{ width: '100%', padding: '12px 18px', fontSize: 14, fontWeight: 600 }}>
-            Sign In
+          <button className="btn btn-primary" type="submit" disabled={busy} style={{ width: '100%', padding: '12px 18px', fontSize: 14, fontWeight: 600 }}>
+            {busy ? 'Please wait…' : tab === 'admin' ? (adminMode === 'signin' ? 'Sign In' : 'Create Account') : 'Sign In'}
           </button>
         </form>
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.03em' }}>
-          {tab === 'admin' ? 'Demo password: admin123' : 'Try: A-101, B-101, C-101'}
-        </p>
+        {tab === 'admin' && (
+          <p style={{ textAlign: 'center', marginTop: 16, fontSize: 12 }}>
+            {adminMode === 'signin' ? (
+              <>New society? <button type="button" className="link-btn" onClick={() => { setAdminMode('signup'); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>Create an account</button></>
+            ) : (
+              <>Already set up? <button type="button" className="link-btn" onClick={() => { setAdminMode('signin'); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>Sign in</button></>
+            )}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SetupSociety({ onCreate }) {
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) { setError('Enter your society name to continue.'); return; }
+    setError('');
+    setBusy(true);
+    try {
+      await onCreate(name.trim());
+    } catch (err) {
+      setError(err.message || 'Could not create your society.');
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <h1 style={{ fontSize: 22 }}>Set Up Your Society</h1>
+        <p className="subtitle">You're signed in — now name the society you're managing.</p>
+        {error && <div className="form-error" role="alert">{error}</div>}
+        <form onSubmit={submit}>
+          <div className="form-group">
+            <label>Society Name</label>
+            <input className="form-control" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Green Valley Residency" autoFocus />
+          </div>
+          <button className="btn btn-primary" type="submit" disabled={busy} style={{ width: '100%', padding: '12px 18px', fontSize: 14, fontWeight: 600 }}>
+            {busy ? 'Creating…' : 'Create Society'}
+          </button>
+        </form>
       </div>
     </div>
   );
 }
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [authPhase, setAuthPhase] = useState('checking'); // checking | login | setup | admin | resident
+  const [profile, setProfile] = useState(null);
+  const [residentPortal, setResidentPortal] = useState(null);
   const [page, setPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pageKey, setPageKey] = useState(0);
+  const [dataLoading, setDataLoading] = useState(false);
 
-  const [buildings, setBuildings] = useState(initialBuildings);
-  const [flats, setFlats] = useState(initialFlats);
-  const [residents, setResidents] = useState(initialResidents);
-  const [bills, setBills] = useState(initialBills);
-  const [payments, setPayments] = useState(initialPayments);
-  const [expenses, setExpenses] = useState(initialExpenses);
-  const [notices, setNotices] = useState(initialNotices);
+  const [buildings, setBuildings] = useState([]);
+  const [flats, setFlats] = useState([]);
+  const [residents, setResidents] = useState([]);
+  const [bills, setBills] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [notices, setNotices] = useState([]);
+
+  const loadAdminData = async () => {
+    setDataLoading(true);
+    try {
+      const data = await fetchAllData();
+      setBuildings(data.buildings);
+      setFlats(data.flats);
+      setResidents(data.residents);
+      setBills(data.bills);
+      setPayments(data.payments);
+      setExpenses(data.expenses);
+      setNotices(data.notices);
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const resolveSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setAuthPhase('login');
+      return;
+    }
+    const myProfile = await getMyProfile();
+    if (!myProfile) {
+      setAuthPhase('setup');
+      return;
+    }
+    setProfile(myProfile);
+    await loadAdminData();
+    setAuthPhase('admin');
+  };
+
+  useEffect(() => {
+    resolveSession();
+    const { data: subscription } = supabase.auth.onAuthStateChange(() => {
+      resolveSession();
+    });
+    return () => subscription.subscription.unsubscribe();
+  }, []);
 
   const changePage = (p) => {
     setPage(p);
@@ -109,36 +215,75 @@ export default function App() {
     setSidebarOpen(false);
   };
 
-  if (!user) return <LoginPage onLogin={setUser} />;
+  const handleAdminSignIn = async (email, password) => {
+    await signInAdmin(email, password);
+  };
 
-  if (user.role === 'resident') {
-    const flat = flats.find(f => f.flatNumber === user.flatNumber);
-    if (!flat) return (
-      <div className="login-page">
-        <div className="login-card">
-          <h1 style={{ fontSize: 22 }}>Flat Not Found</h1>
-          <p className="subtitle">No flat registered with number "{user.flatNumber}"</p>
-          <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} onClick={() => setUser(null)}>Back to Login</button>
-        </div>
-      </div>
-    );
-    const resident = residents.find(r => r.flatId === flat.id);
+  const handleAdminSignUp = async (email, password) => {
+    await signUpAdmin(email, password);
+  };
+
+  const handleCreateSociety = async (name) => {
+    await createSociety(name);
+    await resolveSession();
+  };
+
+  const handleResidentLogin = async (flatNumber) => {
+    const portal = await getResidentPortal(flatNumber);
+    if (!portal) return false;
+    setResidentPortal({ ...portal, flatNumber });
+    setAuthPhase('resident');
+    return true;
+  };
+
+  const handleAdminLogout = async () => {
+    await signOut();
+    setProfile(null);
+    setBuildings([]); setFlats([]); setResidents([]); setBills([]); setPayments([]); setExpenses([]); setNotices([]);
+  };
+
+  const handleResidentLogout = () => {
+    setResidentPortal(null);
+    setAuthPhase('login');
+  };
+
+  if (authPhase === 'checking') return <PageLoading />;
+
+  if (authPhase === 'login') {
+    return <LoginPage onAdminSignIn={handleAdminSignIn} onAdminSignUp={handleAdminSignUp} onResidentLogin={handleResidentLogin} />;
+  }
+
+  if (authPhase === 'setup') {
+    return <SetupSociety onCreate={handleCreateSociety} />;
+  }
+
+  if (authPhase === 'resident') {
     return (
       <Suspense fallback={<PageLoading />}>
-        <ResidentPortal flat={flat} resident={resident} bills={bills} payments={payments} onLogout={() => setUser(null)} />
+        <ResidentPortal
+          flat={residentPortal.flat}
+          resident={residentPortal.resident}
+          bills={residentPortal.bills}
+          payments={residentPortal.payments}
+          onLogout={handleResidentLogout}
+        />
       </Suspense>
     );
   }
 
+  if (dataLoading) return <PageLoading />;
+
+  const societyId = profile.societyId;
+
   const renderPage = () => {
     switch (page) {
       case 'dashboard': return <Dashboard buildings={buildings} flats={flats} bills={bills} payments={payments} expenses={expenses} />;
-      case 'buildings': return <Buildings buildings={buildings} setBuildings={setBuildings} flats={flats} />;
-      case 'flats': return <FlatsResidents buildings={buildings} flats={flats} setFlats={setFlats} residents={residents} setResidents={setResidents} bills={bills} payments={payments} />;
-      case 'billing': return <Billing buildings={buildings} flats={flats} bills={bills} setBills={setBills} payments={payments} />;
-      case 'payments': return <Payments flats={flats} bills={bills} setBills={setBills} payments={payments} setPayments={setPayments} />;
-      case 'expenses': return <Expenses expenses={expenses} setExpenses={setExpenses} />;
-      case 'notices': return <Notices notices={notices} setNotices={setNotices} />;
+      case 'buildings': return <Buildings societyId={societyId} buildings={buildings} setBuildings={setBuildings} flats={flats} />;
+      case 'flats': return <FlatsResidents societyId={societyId} buildings={buildings} flats={flats} setFlats={setFlats} residents={residents} setResidents={setResidents} bills={bills} payments={payments} />;
+      case 'billing': return <Billing societyId={societyId} buildings={buildings} flats={flats} bills={bills} setBills={setBills} payments={payments} />;
+      case 'payments': return <Payments societyId={societyId} flats={flats} bills={bills} setBills={setBills} payments={payments} setPayments={setPayments} />;
+      case 'expenses': return <Expenses societyId={societyId} expenses={expenses} setExpenses={setExpenses} />;
+      case 'notices': return <Notices societyId={societyId} notices={notices} setNotices={setNotices} />;
       case 'reports': return <Reports bills={bills} payments={payments} expenses={expenses} />;
       default: return <Dashboard buildings={buildings} flats={flats} bills={bills} payments={payments} expenses={expenses} />;
     }
@@ -161,7 +306,7 @@ export default function App() {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <button className="logout-btn" onClick={() => setUser(null)}>
+          <button className="logout-btn" onClick={handleAdminLogout}>
             <LogOut size={18} strokeWidth={1.5} />
             Logout
           </button>

@@ -28,18 +28,18 @@
   --accent-soft: #E4C2BD;
 
   /* Status palette */
-  --emerald: #6B8F3F;
-  --emerald-dim: rgba(107, 143, 63, 0.12);
+  --emerald: #395922;
+  --emerald-dim: rgba(57, 89, 34, 0.12);
   --rose: #A33215;
   --rose-dim: rgba(163, 50, 21, 0.10);
-  --ochre: #CC7722;
-  --ochre-dim: rgba(204, 119, 34, 0.12);
-  --sky: #CC7722;
-  --sky-dim: rgba(204, 119, 34, 0.10);
+  --ochre: #714214;
+  --ochre-dim: rgba(113, 66, 20, 0.12);
+  --sky: #714214;
+  --sky-dim: rgba(113, 66, 20, 0.10);
   --violet: #8C6A5C;
   --violet-dim: rgba(140, 106, 92, 0.10);
-  --orange: #CC7722;
-  --orange-dim: rgba(204, 119, 34, 0.10);
+  --orange: #714214;
+  --orange-dim: rgba(113, 66, 20, 0.10);
   --copper: #96613A;
   --copper-dim: rgba(150, 97, 58, 0.10);
 
