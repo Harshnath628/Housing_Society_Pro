@@ -2,16 +2,17 @@ const style = getComputedStyle(document.documentElement);
 const css = (v) => style.getPropertyValue(v).trim();
 
 export const getChartTheme = () => ({
-  axisColor: css('--text-muted') || '#6F5245',
-  tooltipBg: css('--bg-card') || '#EDD6D3',
-  tooltipBorder: css('--border') || '#DBADA7',
-  textPrimary: css('--text-primary') || '#3E2723',
-  textSecondary: css('--text-secondary') || '#5D4037',
-  accent: css('--accent') || '#A43323',
-  accentSoft: css('--accent-soft') || '#E4C2BD',
-  rose: css('--rose') || '#A33215',
-  emerald: css('--emerald') || '#395922',
-  ochre: css('--ochre') || '#714214',
+  axisColor: css('--text-muted') || 'rgba(58,39,13,0.5)',
+  tooltipBg: css('--bg-card') || 'rgba(255,255,255,0.82)',
+  tooltipBorder: css('--border') || 'rgba(182,130,53,0.15)',
+  textPrimary: css('--text-primary') || '#3a270d',
+  textSecondary: css('--text-secondary') || 'rgba(58,39,13,0.7)',
+  accent: css('--accent') || '#a3402d',
+  accentSoft: css('--accent-soft') || 'rgba(163,64,45,0.10)',
+  rose: css('--rose') || '#a3402d',
+  emerald: css('--emerald') || '#4a7a4a',
+  ochre: css('--ochre') || '#b68235',
+  gold: css('--gold') || '#b68235',
 });
 
-export const COLORS = ['#A43323', '#395922', '#714214', '#A33215', '#8C6A5C', '#96613A'];
+export const COLORS = ['#a3402d', '#4a7a4a', '#b68235', '#c4573a', '#96613A', '#714214'];

@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-08-13T10:11:34.765Z",
         "reason": "Status-color left border on .notice-card encodes real priority data (rose/orange/emerald per priority level, reinforced by a text badge); .building-card::after is opacity:0 at rest and only revealed on hover as an interactive affordance, not a static decorative border. Both predate this session and match the app's existing colored-edge-by-status pattern (see .kpi-card::before)."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-08-13T19:47:16.614Z",
+        "reason": "Top corners are 0 radius; accent stripe only touches flat edges"
       }
     ]
   }

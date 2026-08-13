@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { createPayment, updateBillStatus } from '../lib/api';
 
-export default function Payments({ flats, bills, setBills, payments, setPayments }) {
+export default function Payments({ societyId, flats, bills, setBills, payments, setPayments }) {
   const [showRecord, setShowRecord] = useState(false);
   const [form, setForm] = useState({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: '' });
   const [error, setError] = useState('');
@@ -11,7 +12,7 @@ export default function Payments({ flats, bills, setBills, payments, setPayments
   const pendingBills = bills.filter(b => b.status !== 'Paid');
   const selectedFlatBills = form.flatId ? pendingBills.filter(b => b.flatId === +form.flatId) : [];
 
-  const recordPayment = () => {
+  const recordPayment = async () => {
     const missing = [];
     if (!form.flatId) missing.push('Flat');
     if (!form.billId) missing.push('Bill');
@@ -28,24 +29,28 @@ export default function Payments({ flats, bills, setBills, payments, setPayments
     }
     setError('');
 
-    const newPayment = {
-      id: Date.now(),
-      billId: +form.billId,
-      flatId: +form.flatId,
-      amount: +form.amount,
-      mode: form.mode,
-      reference: form.reference || `${form.mode.toUpperCase()}-${Date.now()}`,
-      date: form.date,
-      receivedBy: 'Admin'
-    };
-    setPayments(prev => [...prev, newPayment]);
+    try {
+      const created = await createPayment(societyId, {
+        billId: +form.billId,
+        flatId: +form.flatId,
+        amount: +form.amount,
+        mode: form.mode,
+        reference: form.reference || `${form.mode.toUpperCase()}-${Date.now()}`,
+        date: form.date,
+        receivedBy: 'Admin'
+      });
+      setPayments(prev => [...prev, created]);
 
-    const totalPaid = payments.filter(p => p.billId === bill.id).reduce((s, p) => s + p.amount, 0) + +form.amount;
-    const newStatus = totalPaid >= bill.totalDue ? 'Paid' : 'Partial';
-    setBills(prev => prev.map(b => b.id === bill.id ? { ...b, status: newStatus } : b));
+      const totalPaid = payments.filter(p => p.billId === bill.id).reduce((s, p) => s + p.amount, 0) + +form.amount;
+      const newStatus = totalPaid >= bill.totalDue ? 'Paid' : 'Partial';
+      const updatedBill = await updateBillStatus(bill.id, newStatus);
+      setBills(prev => prev.map(b => b.id === bill.id ? updatedBill : b));
 
-    setShowRecord(false);
-    setForm({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: '' });
+      setShowRecord(false);
+      setForm({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: '' });
+    } catch (err) {
+      setError(err.message || 'Could not record payment.');
+    }
   };
 
   const sorted = [...payments].sort((a, b) => b.date.localeCompare(a.date));

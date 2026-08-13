@@ -15,8 +15,9 @@ const ResidentPortal = lazy(() => import('./pages/ResidentPortal'));
 
 function PageLoading() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', color: 'var(--text-muted)', fontSize: 13, fontWeight: 500 }}>
-      Loading…
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: 16 }}>
+      <div className="page-loading-shimmer" />
+      <div className="page-loading-shimmer" style={{ width: 160 }} />
     </div>
   );
 }
@@ -70,9 +71,104 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
 
   return (
     <div className="login-page">
-      <div className="login-card" style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(12px)', transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+      {/* Terracotta frame — left & right vertical edges */}
+      <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 4, background: 'linear-gradient(180deg, #c4573a, #d4956b 50%, #c4573a)', zIndex: 10 }} />
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 4, background: 'linear-gradient(180deg, #c4573a, #d4956b 50%, #c4573a)', zIndex: 10 }} />
+      {/* Inner hairline border */}
+      <div className="login-hairline" />
+      {/* Floating gold dust particles */}
+      <span className="login-dust" /><span className="login-dust" /><span className="login-dust" /><span className="login-dust" />
+      <span className="login-dust" /><span className="login-dust" /><span className="login-dust" /><span className="login-dust" />
+
+      {/* Chand Baori stepwell — left */}
+      <svg className="login-motif login-motif-stepwell-l" width="110" height="580" viewBox="0 0 110 580" style={{ position: 'absolute', left: 18, top: 60 }} aria-hidden="true">
+        <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#a3402d" strokeWidth="1.2"/>
+        <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#a3402d" strokeWidth="1"/>
+        <line x1="90" y1="0" x2="90" y2="30" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="75" y1="30" x2="75" y2="60" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="60" y1="60" x2="60" y2="90" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="45" y1="90" x2="45" y2="120" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="30" y1="120" x2="30" y2="150" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="15" y1="150" x2="15" y2="180" stroke="#a3402d" strokeWidth="0.5"/>
+        <path d="M68,72 Q72,65 76,72" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        <path d="M53,102 Q57,95 61,102" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        <path d="M38,132 Q42,125 46,132" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        <path d="M23,162 Q27,155 31,162" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+      </svg>
+
+      {/* Chand Baori stepwell — right (mirrored) */}
+      <svg className="login-motif login-motif-stepwell-r" width="110" height="580" viewBox="0 0 110 580" style={{ position: 'absolute', right: 18, top: 60, transform: 'scaleX(-1)' }} aria-hidden="true">
+        <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#a3402d" strokeWidth="1.2"/>
+        <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#a3402d" strokeWidth="1"/>
+        <line x1="90" y1="0" x2="90" y2="30" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="75" y1="30" x2="75" y2="60" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="60" y1="60" x2="60" y2="90" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="45" y1="90" x2="45" y2="120" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="30" y1="120" x2="30" y2="150" stroke="#a3402d" strokeWidth="0.5"/>
+        <line x1="15" y1="150" x2="15" y2="180" stroke="#a3402d" strokeWidth="0.5"/>
+        <path d="M68,72 Q72,65 76,72" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        <path d="M53,102 Q57,95 61,102" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        <path d="M38,132 Q42,125 46,132" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        <path d="M23,162 Q27,155 31,162" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+      </svg>
+
+      {/* Central lotus mandala — proper petals from handoff */}
+      <svg className="login-motif login-motif-lotus" width="360" height="360" viewBox="0 0 360 360" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} aria-hidden="true">
+        <circle cx="180" cy="180" r="175" fill="none" stroke="#a3402d" strokeWidth="0.8"/>
+        <circle cx="180" cy="180" r="160" fill="none" stroke="#b68235" strokeWidth="0.5"/>
+        {/* Cardinal petals — gold */}
+        <path d="M180,20 Q195,80 180,120 Q165,80 180,20Z" fill="none" stroke="#b68235" strokeWidth="0.7"/>
+        <path d="M180,340 Q195,280 180,240 Q165,280 180,340Z" fill="none" stroke="#b68235" strokeWidth="0.7"/>
+        <path d="M20,180 Q80,165 120,180 Q80,195 20,180Z" fill="none" stroke="#b68235" strokeWidth="0.7"/>
+        <path d="M340,180 Q280,165 240,180 Q280,195 340,180Z" fill="none" stroke="#b68235" strokeWidth="0.7"/>
+        {/* Diagonal petals — terracotta */}
+        <path d="M67,67 Q120,100 120,120 Q100,120 67,67Z" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <path d="M293,67 Q240,100 240,120 Q260,120 293,67Z" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <path d="M67,293 Q120,260 120,240 Q100,240 67,293Z" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <path d="M293,293 Q240,260 240,240 Q260,240 293,293Z" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        {/* Intermediate petals */}
+        <path d="M110,30 Q140,90 135,130 Q115,100 110,30Z" fill="none" stroke="#a3402d" strokeWidth="0.5"/>
+        <path d="M250,30 Q220,90 225,130 Q245,100 250,30Z" fill="none" stroke="#a3402d" strokeWidth="0.5"/>
+        <path d="M110,330 Q140,270 135,230 Q115,260 110,330Z" fill="none" stroke="#a3402d" strokeWidth="0.5"/>
+        <path d="M250,330 Q220,270 225,230 Q245,260 250,330Z" fill="none" stroke="#a3402d" strokeWidth="0.5"/>
+        {/* Inner rings */}
+        <circle cx="180" cy="180" r="55" fill="none" stroke="#b68235" strokeWidth="0.8"/>
+        <circle cx="180" cy="180" r="40" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <circle cx="180" cy="180" r="18" fill="none" stroke="#b68235" strokeWidth="0.7"/>
+        <circle cx="180" cy="180" r="6" fill="#b68235" opacity="0.12"/>
+      </svg>
+
+      {/* Top pavilion — arched colonnade */}
+      <svg className="login-motif login-motif-pavilion" width="180" height="50" viewBox="0 0 180 50" style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)' }} aria-hidden="true">
+        <path d="M30,50 L30,25 Q30,8 60,8 L120,8 Q150,8 150,25 L150,50" fill="none" stroke="#a3402d" strokeWidth="1"/>
+        <path d="M60,8 L60,0" stroke="#a3402d" strokeWidth="0.6" fill="none"/>
+        <path d="M90,8 L90,0" stroke="#a3402d" strokeWidth="0.6" fill="none"/>
+        <path d="M120,8 L120,0" stroke="#a3402d" strokeWidth="0.6" fill="none"/>
+        <path d="M80,8 Q90,0 100,8" fill="none" stroke="#b68235" strokeWidth="0.7"/>
+      </svg>
+
+      {/* Bottom pool — stepped corners */}
+      <svg className="login-motif login-motif-pool" width="200" height="60" viewBox="0 0 200 60" style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)' }} aria-hidden="true">
+        <rect x="20" y="5" width="160" height="50" rx="2" fill="none" stroke="#a3402d" strokeWidth="1"/>
+        <rect x="30" y="12" width="140" height="36" rx="1" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <line x1="40" y1="30" x2="160" y2="30" stroke="#b68235" strokeWidth="0.4" strokeDasharray="3,4"/>
+        <path d="M20,5 L10,5 L10,15 L5,15 L5,25" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <path d="M180,5 L190,5 L190,15 L195,15 L195,25" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <path d="M20,55 L10,55 L10,45 L5,45 L5,35" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+        <path d="M180,55 L190,55 L190,45 L195,45 L195,35" fill="none" stroke="#a3402d" strokeWidth="0.6"/>
+      </svg>
+
+      {/* Gold ornament above logo */}
+      <svg className="login-ornament-top" width="120" height="16" viewBox="0 0 120 16" style={{ marginBottom: 22, opacity: 0.5 }} aria-hidden="true">
+        <line x1="0" y1="8" x2="42" y2="8" stroke="#b68235" strokeWidth="0.5"/>
+        <circle cx="60" cy="8" r="5" fill="none" stroke="#b68235" strokeWidth="0.6"/>
+        <circle cx="60" cy="8" r="2" fill="#b68235" opacity="0.4"/>
+        <line x1="78" y1="8" x2="120" y2="8" stroke="#b68235" strokeWidth="0.5"/>
+      </svg>
+
+      <div className="login-card" style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(12px)', transition: 'all 0.7s cubic-bezier(0.23, 1, 0.32, 1) 0.3s' }}>
         <h1>Society<span style={{ color: 'var(--accent)' }}>Pro</span></h1>
-        <p className="subtitle">Society Maintenance Management System</p>
+        <p className="subtitle">Society Maintenance Management</p>
         <div className="login-tabs">
           <button className={`login-tab ${tab === 'admin' ? 'active' : ''}`} onClick={() => { setTab('admin'); setError(''); }}>Admin</button>
           <button className={`login-tab ${tab === 'resident' ? 'active' : ''}`} onClick={() => { setTab('resident'); setError(''); }}>Resident</button>
@@ -96,20 +192,27 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
               <input className="form-control" value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101" autoFocus />
             </div>
           )}
-          <button className="btn btn-primary" type="submit" disabled={busy} style={{ width: '100%', padding: '12px 18px', fontSize: 14, fontWeight: 600 }}>
+          <button className="btn btn-outline" type="submit" disabled={busy} style={{ width: '100%', padding: 12, fontSize: 15, fontFamily: "'Yeseva One', serif" }}>
             {busy ? 'Please wait…' : tab === 'admin' ? (adminMode === 'signin' ? 'Sign In' : 'Create Account') : 'Sign In'}
           </button>
         </form>
         {tab === 'admin' && (
-          <p style={{ textAlign: 'center', marginTop: 16, fontSize: 12 }}>
+          <p style={{ textAlign: 'center', marginTop: 16, fontSize: 11, color: 'rgba(58,39,13,0.35)' }}>
             {adminMode === 'signin' ? (
-              <>New society? <button type="button" className="link-btn" onClick={() => { setAdminMode('signup'); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>Create an account</button></>
+              <>New society? <button type="button" onClick={() => { setAdminMode('signup'); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600, fontSize: 11, fontFamily: 'var(--font-body)' }}>Create an account</button></>
             ) : (
-              <>Already set up? <button type="button" className="link-btn" onClick={() => { setAdminMode('signin'); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}>Sign in</button></>
+              <>Already set up? <button type="button" onClick={() => { setAdminMode('signin'); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600, fontSize: 11, fontFamily: 'var(--font-body)' }}>Sign in</button></>
             )}
           </p>
         )}
       </div>
+
+      {/* Diamond ornament below card */}
+      <svg className="login-ornament-bottom" width="80" height="16" viewBox="0 0 80 16" style={{ marginTop: 28, opacity: 0.3 }} aria-hidden="true">
+        <line x1="0" y1="8" x2="28" y2="8" stroke="#a3402d" strokeWidth="0.6"/>
+        <rect x="33" y="3" width="14" height="10" rx="1" fill="none" stroke="#a3402d" strokeWidth="0.6" transform="rotate(45,40,8)"/>
+        <line x1="52" y1="8" x2="80" y2="8" stroke="#a3402d" strokeWidth="0.6"/>
+      </svg>
     </div>
   );
 }
@@ -305,6 +408,18 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <div className="sidebar-ornament" aria-hidden="true">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="0.5" opacity="0.15"/>
+            <circle cx="40" cy="40" r="28" stroke="currentColor" strokeWidth="0.3" opacity="0.1"/>
+            <path d="M40,8 Q46,22 40,30 Q34,22 40,8Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+            <path d="M40,72 Q46,58 40,50 Q34,58 40,72Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+            <path d="M8,40 Q22,34 30,40 Q22,46 8,40Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+            <path d="M72,40 Q58,34 50,40 Q58,46 72,40Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+            <circle cx="40" cy="40" r="6" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.15"/>
+            <circle cx="40" cy="40" r="2" fill="currentColor" opacity="0.08"/>
+          </svg>
+        </div>
         <div className="sidebar-footer">
           <button className="logout-btn" onClick={handleAdminLogout}>
             <LogOut size={18} strokeWidth={1.5} />

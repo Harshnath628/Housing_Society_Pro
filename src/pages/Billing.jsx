@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
 import { MAINTENANCE_RATE_PER_SQFT } from '../data/mockData';
+import { generateBills } from '../lib/api';
 
-export default function Billing({ buildings, flats, bills, setBills, payments }) {
+export default function Billing({ societyId, buildings, flats, bills, setBills, payments }) {
   const [showBulk, setShowBulk] = useState(false);
   const [bulkMonth, setBulkMonth] = useState('');
   const [bulkMode, setBulkMode] = useState('per_sqft');
@@ -15,7 +16,7 @@ export default function Billing({ buildings, flats, bills, setBills, payments })
   const months = [...new Set(bills.map(b => b.month))].sort().reverse();
   const filtered = filterMonth === 'all' ? bills : bills.filter(b => b.month === filterMonth);
 
-  const generateBulk = () => {
+  const generateBulk = async () => {
     if (!bulkMonth) {
       setError('Select a month to generate bills for.');
       return;
@@ -34,7 +35,6 @@ export default function Billing({ buildings, flats, bills, setBills, payments })
         return s + (b.totalDue - paid);
       }, 0);
       return {
-        id: Date.now() + f.id,
         flatId: f.id,
         month: bulkMonth,
         amount,
@@ -48,9 +48,14 @@ export default function Billing({ buildings, flats, bills, setBills, payments })
       setError('Bills are already generated for every flat this month.');
       return;
     }
-    setBills(prev => [...prev, ...newBills]);
-    setShowBulk(false);
-    alert(`Generated ${newBills.length} bills for ${bulkMonth}`);
+    try {
+      const created = await generateBills(societyId, newBills);
+      setBills(prev => [...prev, ...created]);
+      setShowBulk(false);
+      alert(`Generated ${created.length} bills for ${bulkMonth}`);
+    } catch (err) {
+      setError(err.message || 'Could not generate bills.');
+    }
   };
 
   return (

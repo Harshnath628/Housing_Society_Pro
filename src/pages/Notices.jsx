@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { createNotice, deleteNotice as deleteNoticeApi } from '../lib/api';
 
-export default function Notices({ notices, setNotices }) {
+export default function Notices({ societyId, notices, setNotices }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: '', content: '', priority: 'Normal' });
   const [error, setError] = useState('');
 
-  const addNotice = () => {
+  const addNotice = async () => {
     const missing = [];
     if (!form.title) missing.push('Title');
     if (!form.content) missing.push('Content');
@@ -15,14 +16,25 @@ export default function Notices({ notices, setNotices }) {
       return;
     }
     setError('');
-    const newN = { id: Date.now(), ...form, date: new Date().toISOString().split('T')[0], author: 'Admin' };
-    setNotices(prev => [newN, ...prev]);
-    setShowAdd(false);
-    setForm({ title: '', content: '', priority: 'Normal' });
+    try {
+      const created = await createNotice(societyId, form);
+      setNotices(prev => [created, ...prev]);
+      setShowAdd(false);
+      setForm({ title: '', content: '', priority: 'Normal' });
+    } catch (err) {
+      setError(err.message || 'Could not post notice.');
+    }
   };
 
-  const deleteNotice = (id) => {
-    if (confirm('Delete this notice?')) setNotices(prev => prev.filter(n => n.id !== id));
+  const deleteNotice = async (id) => {
+    if (confirm('Delete this notice?')) {
+      try {
+        await deleteNoticeApi(id);
+        setNotices(prev => prev.filter(n => n.id !== id));
+      } catch (err) {
+        alert(err.message || 'Could not delete notice.');
+      }
+    }
   };
 
   return (

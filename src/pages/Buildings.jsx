@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { createBuilding, updateBuilding, deleteBuilding as deleteBuildingApi } from '../lib/api';
 
-export default function Buildings({ buildings, setBuildings, flats }) {
+export default function Buildings({ societyId, buildings, setBuildings, flats }) {
   const [showAdd, setShowAdd] = useState(false);
   const [editBuilding, setEditBuilding] = useState(null);
   const [form, setForm] = useState({ name: '', floors: '', totalFlats: '', yearBuilt: '' });
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const openAdd = () => {
     setForm({ name: '', floors: '', totalFlats: '', yearBuilt: '' });
@@ -21,7 +23,7 @@ export default function Buildings({ buildings, setBuildings, flats }) {
     setShowAdd(true);
   };
 
-  const save = () => {
+  const save = async () => {
     const missing = [];
     if (!form.name) missing.push('Building Name');
     if (!form.floors) missing.push('Floors');
@@ -31,23 +33,37 @@ export default function Buildings({ buildings, setBuildings, flats }) {
       return;
     }
     setError('');
-    if (editBuilding) {
-      setBuildings(prev => prev.map(b => b.id === editBuilding.id ? { ...b, name: form.name, floors: +form.floors, totalFlats: +form.totalFlats, yearBuilt: +form.yearBuilt } : b));
-    } else {
-      const newB = { id: Date.now(), name: form.name, floors: +form.floors, totalFlats: +form.totalFlats, yearBuilt: +form.yearBuilt || new Date().getFullYear() };
-      setBuildings(prev => [...prev, newB]);
+    setSaving(true);
+    try {
+      const payload = { name: form.name, floors: +form.floors, totalFlats: +form.totalFlats, yearBuilt: +form.yearBuilt || new Date().getFullYear() };
+      if (editBuilding) {
+        const updated = await updateBuilding(editBuilding.id, payload);
+        setBuildings(prev => prev.map(b => b.id === editBuilding.id ? updated : b));
+      } else {
+        const created = await createBuilding(societyId, payload);
+        setBuildings(prev => [...prev, created]);
+      }
+      setShowAdd(false);
+    } catch (err) {
+      setError(err.message || 'Could not save building.');
+    } finally {
+      setSaving(false);
     }
-    setShowAdd(false);
   };
 
-  const deleteBuilding = (b) => {
+  const deleteBuilding = async (b) => {
     const hasFlats = flats.some(f => f.buildingId === b.id);
     if (hasFlats) {
       alert(`Cannot delete "${b.name}" — it has registered flats. Remove them first.`);
       return;
     }
     if (confirm(`Delete building "${b.name}"?`)) {
-      setBuildings(prev => prev.filter(x => x.id !== b.id));
+      try {
+        await deleteBuildingApi(b.id);
+        setBuildings(prev => prev.filter(x => x.id !== b.id));
+      } catch (err) {
+        alert(err.message || 'Could not delete building.');
+      }
     }
   };
 
@@ -78,7 +94,7 @@ export default function Buildings({ buildings, setBuildings, flats }) {
       </div>
 
       <Modal show={showAdd} onClose={() => setShowAdd(false)} title={editBuilding ? 'Edit Building' : 'Add Building'}
-        footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={save}>Save</button></>}>
+        footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
         <div className="form-group">
           <label>Building Name</label>

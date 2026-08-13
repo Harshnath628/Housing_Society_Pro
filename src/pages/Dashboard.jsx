@@ -59,7 +59,7 @@ export default function Dashboard({ buildings, flats, bills, payments, expenses 
           { label: 'Pending Amount', value: fmt(totalPending), sub: `from ${bills.filter(b => b.status !== 'Paid').length} unpaid bills`, cls: 'warning' },
           { label: 'Total Expenses', value: fmt(totalExpenses), sub: `Net: ${fmt(totalCollected - totalExpenses)}`, cls: 'danger' },
         ].map((kpi, i) => (
-          <div className={`kpi-card ${kpi.cls} stagger-in`} key={i}>
+          <div className={`kpi-card ${kpi.cls}`} key={i} style={{ '--card-index': i }}>
             <div className="kpi-label">{kpi.label}</div>
             <div className="kpi-value">{kpi.value}</div>
             <div className="kpi-sub">{kpi.sub}</div>

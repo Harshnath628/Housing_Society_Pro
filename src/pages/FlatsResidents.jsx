@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { createFlat, createResident, updateResident as updateResidentApi, updateFlatOwner } from '../lib/api';
 
-export default function FlatsResidents({ buildings, flats, setFlats, residents, setResidents, bills, payments }) {
+export default function FlatsResidents({ societyId, buildings, flats, setFlats, residents, setResidents, bills, payments }) {
   const [filterBuilding, setFilterBuilding] = useState('all');
   const [showAddFlat, setShowAddFlat] = useState(false);
   const [showAddResident, setShowAddResident] = useState(false);
@@ -19,7 +20,7 @@ export default function FlatsResidents({ buildings, flats, setFlats, residents, 
   const filtered = filterBuilding === 'all' ? flats : flats.filter(f => f.buildingId === +filterBuilding);
   const fmt = n => '₹' + n.toLocaleString('en-IN');
 
-  const addFlat = () => {
+  const addFlat = async () => {
     const missing = [];
     if (!flatForm.buildingId) missing.push('Building');
     if (!flatForm.flatNumber) missing.push('Flat Number');
@@ -29,14 +30,18 @@ export default function FlatsResidents({ buildings, flats, setFlats, residents, 
       return;
     }
     setFlatError('');
-    const newFlat = {
-      id: Date.now(), buildingId: +flatForm.buildingId, flatNumber: flatForm.flatNumber,
-      floor: +flatForm.floor, type: flatForm.type, area: +flatForm.area || 0,
-      ownerName: flatForm.ownerName, ownerMobile: flatForm.ownerMobile
-    };
-    setFlats(prev => [...prev, newFlat]);
-    setShowAddFlat(false);
-    setFlatForm({ buildingId: '', flatNumber: '', floor: '', type: '2BHK', area: '', ownerName: '', ownerMobile: '' });
+    try {
+      const created = await createFlat(societyId, {
+        buildingId: +flatForm.buildingId, flatNumber: flatForm.flatNumber,
+        floor: +flatForm.floor, type: flatForm.type, area: +flatForm.area || 0,
+        ownerName: flatForm.ownerName, ownerMobile: flatForm.ownerMobile
+      });
+      setFlats(prev => [...prev, created]);
+      setShowAddFlat(false);
+      setFlatForm({ buildingId: '', flatNumber: '', floor: '', type: '2BHK', area: '', ownerName: '', ownerMobile: '' });
+    } catch (err) {
+      setFlatError(err.message || 'Could not add flat.');
+    }
   };
 
   const validateResidentForm = () => {
@@ -51,17 +56,26 @@ export default function FlatsResidents({ buildings, flats, setFlats, residents, 
     return true;
   };
 
-  const addResident = () => {
+  const addResident = async () => {
     if (!validateResidentForm()) return;
-    const newR = { id: Date.now(), flatId: selectedFlat.id, ...residentForm };
-    setResidents(prev => [...prev, newR]);
-    setShowAddResident(false);
+    try {
+      const created = await createResident(societyId, selectedFlat.id, residentForm);
+      setResidents(prev => [...prev, created]);
+      setShowAddResident(false);
+    } catch (err) {
+      setResidentError(err.message || 'Could not add resident.');
+    }
   };
 
-  const saveEditResident = () => {
+  const saveEditResident = async () => {
     if (!validateResidentForm()) return;
-    setResidents(prev => prev.map(r => r.id === showEditResident.id ? { ...r, ...residentForm } : r));
-    setShowEditResident(null);
+    try {
+      const updated = await updateResidentApi(showEditResident.id, residentForm);
+      setResidents(prev => prev.map(r => r.id === showEditResident.id ? updated : r));
+      setShowEditResident(null);
+    } catch (err) {
+      setResidentError(err.message || 'Could not save resident.');
+    }
   };
 
   const openEditResident = (r) => {
@@ -82,9 +96,14 @@ export default function FlatsResidents({ buildings, flats, setFlats, residents, 
     setShowEditOwner(flat);
   };
 
-  const saveOwner = () => {
-    setFlats(prev => prev.map(f => f.id === showEditOwner.id ? { ...f, ownerName: ownerForm.ownerName, ownerMobile: ownerForm.ownerMobile } : f));
-    setShowEditOwner(null);
+  const saveOwner = async () => {
+    try {
+      const updated = await updateFlatOwner(showEditOwner.id, ownerForm.ownerName, ownerForm.ownerMobile);
+      setFlats(prev => prev.map(f => f.id === showEditOwner.id ? updated : f));
+      setShowEditOwner(null);
+    } catch (err) {
+      alert(err.message || 'Could not save owner details.');
+    }
   };
 
   const getStatementData = (flat) => {

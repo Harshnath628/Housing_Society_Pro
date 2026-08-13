@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
 import { EXPENSE_CATEGORIES } from '../data/mockData';
+import { createExpense } from '../lib/api';
 
-export default function Expenses({ expenses, setExpenses }) {
+export default function Expenses({ societyId, expenses, setExpenses }) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ category: 'Security', description: '', amount: '', date: '', paidTo: '' });
   const [error, setError] = useState('');
 
   const fmt = n => '₹' + n.toLocaleString('en-IN');
 
-  const addExpense = () => {
+  const addExpense = async () => {
     const missing = [];
     if (!form.description) missing.push('Description');
     if (!form.amount) missing.push('Amount');
@@ -19,10 +20,14 @@ export default function Expenses({ expenses, setExpenses }) {
       return;
     }
     setError('');
-    const newE = { id: Date.now(), ...form, amount: +form.amount };
-    setExpenses(prev => [...prev, newE]);
-    setShowAdd(false);
-    setForm({ category: 'Security', description: '', amount: '', date: '', paidTo: '' });
+    try {
+      const created = await createExpense(societyId, { ...form, amount: +form.amount });
+      setExpenses(prev => [...prev, created]);
+      setShowAdd(false);
+      setForm({ category: 'Security', description: '', amount: '', date: '', paidTo: '' });
+    } catch (err) {
+      setError(err.message || 'Could not add expense.');
+    }
   };
 
   const totalByCategory = {};
