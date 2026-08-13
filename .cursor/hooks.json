@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "[ ! -f \"C:\\\\Users\\\\Harsh Nath Tripathi\\\\.cursor\\\\skills\\\\impeccable\\\\scripts\\\\hook-before-edit.mjs\" ] || node \"C:\\\\Users\\\\Harsh Nath Tripathi\\\\.cursor\\\\skills\\\\impeccable\\\\scripts\\\\hook-before-edit.mjs\"",
+        "timeout": 5
+      }
+    ]
+  }
+}
