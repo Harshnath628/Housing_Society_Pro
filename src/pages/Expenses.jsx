@@ -100,28 +100,28 @@ export default function Expenses({ societyId, expenses, setExpenses }) {
         footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={addExpense}>Add</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
         <div className="form-group">
-          <label>Category</label>
-          <select className="form-control" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+          <label htmlFor="expense-category">Category</label>
+          <select id="expense-category" className="form-control" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
             {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
         <div className="form-group">
-          <label>Description</label>
-          <input className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+          <label htmlFor="expense-description">Description</label>
+          <input id="expense-description" className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Amount (₹)</label>
-            <input className="form-control" type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+            <label htmlFor="expense-amount">Amount (₹)</label>
+            <input id="expense-amount" className="form-control" type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
           </div>
           <div className="form-group">
-            <label>Date</label>
-            <input className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            <label htmlFor="expense-date">Date</label>
+            <input id="expense-date" className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
           </div>
         </div>
         <div className="form-group">
-          <label>Paid To</label>
-          <input className="form-control" value={form.paidTo} onChange={e => setForm({ ...form, paidTo: e.target.value })} />
+          <label htmlFor="expense-paid-to">Paid To</label>
+          <input id="expense-paid-to" className="form-control" value={form.paidTo} onChange={e => setForm({ ...form, paidTo: e.target.value })} />
         </div>
       </Modal>
     </div>

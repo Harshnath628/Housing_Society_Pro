@@ -68,16 +68,16 @@ export default function Notices({ societyId, notices, setNotices }) {
         footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={addNotice}>Post</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
         <div className="form-group">
-          <label>Title</label>
-          <input className="form-control" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+          <label htmlFor="notice-title">Title</label>
+          <input id="notice-title" className="form-control" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
         </div>
         <div className="form-group">
-          <label>Content</label>
-          <textarea className="form-control" rows={4} value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
+          <label htmlFor="notice-content">Content</label>
+          <textarea id="notice-content" className="form-control" rows={4} value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
         </div>
         <div className="form-group">
-          <label>Priority</label>
-          <select className="form-control" value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
+          <label htmlFor="notice-priority">Priority</label>
+          <select id="notice-priority" className="form-control" value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
             <option>High</option><option>Normal</option><option>Low</option>
           </select>
         </div>

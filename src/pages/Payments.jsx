@@ -93,16 +93,16 @@ export default function Payments({ societyId, flats, bills, setBills, payments, 
         footer={<><button className="btn btn-outline" onClick={() => setShowRecord(false)}>Cancel</button><button className="btn btn-success" onClick={recordPayment}>Record</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
         <div className="form-group">
-          <label>Flat</label>
-          <select className="form-control" value={form.flatId} onChange={e => setForm({ ...form, flatId: e.target.value, billId: '' })}>
+          <label htmlFor="payment-flat">Flat</label>
+          <select id="payment-flat" className="form-control" value={form.flatId} onChange={e => setForm({ ...form, flatId: e.target.value, billId: '' })}>
             <option value="">Select Flat</option>
             {flats.map(f => <option key={f.id} value={f.id}>{f.flatNumber}</option>)}
           </select>
         </div>
         {form.flatId && (
           <div className="form-group">
-            <label>Pending Bill</label>
-            <select className="form-control" value={form.billId} onChange={e => {
+            <label htmlFor="payment-bill">Pending Bill</label>
+            <select id="payment-bill" className="form-control" value={form.billId} onChange={e => {
               const bill = bills.find(b => b.id === +e.target.value);
               const paid = bill ? payments.filter(p => p.billId === bill.id).reduce((s, p) => s + p.amount, 0) : 0;
               setForm({ ...form, billId: e.target.value, amount: bill ? (bill.totalDue - paid).toString() : '' });
@@ -117,24 +117,24 @@ export default function Payments({ societyId, flats, bills, setBills, payments, 
         )}
         <div className="form-row">
           <div className="form-group">
-            <label>Amount (₹)</label>
-            <input className="form-control" type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+            <label htmlFor="payment-amount">Amount (₹)</label>
+            <input id="payment-amount" className="form-control" type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
           </div>
           <div className="form-group">
-            <label>Mode</label>
-            <select className="form-control" value={form.mode} onChange={e => setForm({ ...form, mode: e.target.value })}>
+            <label htmlFor="payment-mode">Mode</label>
+            <select id="payment-mode" className="form-control" value={form.mode} onChange={e => setForm({ ...form, mode: e.target.value })}>
               <option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option>
             </select>
           </div>
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Reference</label>
-            <input className="form-control" value={form.reference} onChange={e => setForm({ ...form, reference: e.target.value })} placeholder="Optional" />
+            <label htmlFor="payment-reference">Reference</label>
+            <input id="payment-reference" className="form-control" value={form.reference} onChange={e => setForm({ ...form, reference: e.target.value })} placeholder="Optional" />
           </div>
           <div className="form-group">
-            <label>Date</label>
-            <input className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            <label htmlFor="payment-date">Date</label>
+            <input id="payment-date" className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
           </div>
         </div>
       </Modal>

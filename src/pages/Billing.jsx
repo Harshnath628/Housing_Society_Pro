@@ -66,7 +66,7 @@ export default function Billing({ societyId, buildings, flats, bills, setBills, 
       </div>
 
       <div className="filter-bar">
-        <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)}>
+        <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} aria-label="Filter by month">
           <option value="all">All Months</option>
           {months.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
@@ -105,20 +105,20 @@ export default function Billing({ societyId, buildings, flats, bills, setBills, 
         footer={<><button className="btn btn-outline" onClick={() => setShowBulk(false)}>Cancel</button><button className="btn btn-primary" onClick={generateBulk}>Generate</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
         <div className="form-group">
-          <label>Month</label>
-          <input className="form-control" type="month" value={bulkMonth} onChange={e => setBulkMonth(e.target.value)} />
+          <label htmlFor="bulk-bill-month">Month</label>
+          <input id="bulk-bill-month" className="form-control" type="month" value={bulkMonth} onChange={e => setBulkMonth(e.target.value)} />
         </div>
         <div className="form-group">
-          <label>Rate Mode</label>
-          <select className="form-control" value={bulkMode} onChange={e => setBulkMode(e.target.value)}>
+          <label htmlFor="bulk-bill-rate-mode">Rate Mode</label>
+          <select id="bulk-bill-rate-mode" className="form-control" value={bulkMode} onChange={e => setBulkMode(e.target.value)}>
             <option value="per_sqft">Per Square Foot (₹{MAINTENANCE_RATE_PER_SQFT}/sqft)</option>
             <option value="fixed">Fixed Amount</option>
           </select>
         </div>
         {bulkMode === 'fixed' && (
           <div className="form-group">
-            <label>Fixed Amount (₹)</label>
-            <input className="form-control" type="number" value={bulkFixedAmount} onChange={e => setBulkFixedAmount(e.target.value)} placeholder="5000" />
+            <label htmlFor="bulk-bill-fixed-amount">Fixed Amount (₹)</label>
+            <input id="bulk-bill-fixed-amount" className="form-control" type="number" value={bulkFixedAmount} onChange={e => setBulkFixedAmount(e.target.value)} placeholder="5000" />
           </div>
         )}
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>

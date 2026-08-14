@@ -15,4 +15,4 @@ export const getChartTheme = () => ({
   gold: css('--gold') || '#b68235',
 });
 
-export const COLORS = ['#a3402d', '#4a7a4a', '#b68235', '#c4573a', '#96613A', '#714214'];
+export const COLORS = ['#9b3420', '#2d7a3a', '#c48a1a', '#c44b2a', '#8a5028', '#5c3012'];

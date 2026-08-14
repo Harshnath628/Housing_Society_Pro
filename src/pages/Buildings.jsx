@@ -97,22 +97,22 @@ export default function Buildings({ societyId, buildings, setBuildings, flats })
         footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
         <div className="form-group">
-          <label>Building Name</label>
-          <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Tower D" autoFocus />
+          <label htmlFor="building-name">Building Name</label>
+          <input id="building-name" className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Tower D" autoFocus />
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Floors</label>
-            <input className="form-control" type="number" value={form.floors} onChange={e => setForm({ ...form, floors: e.target.value })} />
+            <label htmlFor="building-floors">Floors</label>
+            <input id="building-floors" className="form-control" type="number" value={form.floors} onChange={e => setForm({ ...form, floors: e.target.value })} />
           </div>
           <div className="form-group">
-            <label>Total Flats</label>
-            <input className="form-control" type="number" value={form.totalFlats} onChange={e => setForm({ ...form, totalFlats: e.target.value })} />
+            <label htmlFor="building-total-flats">Total Flats</label>
+            <input id="building-total-flats" className="form-control" type="number" value={form.totalFlats} onChange={e => setForm({ ...form, totalFlats: e.target.value })} />
           </div>
         </div>
         <div className="form-group">
-          <label>Year Built</label>
-          <input className="form-control" type="number" value={form.yearBuilt} onChange={e => setForm({ ...form, yearBuilt: e.target.value })} placeholder="2024" />
+          <label htmlFor="building-year-built">Year Built</label>
+          <input id="building-year-built" className="form-control" type="number" value={form.yearBuilt} onChange={e => setForm({ ...form, yearBuilt: e.target.value })} placeholder="2024" />
         </div>
       </Modal>
     </div>

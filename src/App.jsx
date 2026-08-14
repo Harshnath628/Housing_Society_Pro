@@ -72,8 +72,8 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
   return (
     <div className="login-page">
       {/* Terracotta frame — left & right vertical edges */}
-      <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 4, background: 'linear-gradient(180deg, #c4573a, #d4956b 50%, #c4573a)', zIndex: 10 }} />
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 4, background: 'linear-gradient(180deg, #c4573a, #d4956b 50%, #c4573a)', zIndex: 10 }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 4, background: 'var(--frame-v)', zIndex: 10 }} />
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 4, background: 'var(--frame-v)', zIndex: 10 }} />
       {/* Inner hairline border */}
       <div className="login-hairline" />
       {/* Floating gold dust particles */}
@@ -82,88 +82,88 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
 
       {/* Chand Baori stepwell — left */}
       <svg className="login-motif login-motif-stepwell-l" width="110" height="580" viewBox="0 0 110 580" style={{ position: 'absolute', left: 18, top: 60 }} aria-hidden="true">
-        <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#a3402d" strokeWidth="2.4"/>
-        <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#a3402d" strokeWidth="2"/>
-        <line x1="90" y1="0" x2="90" y2="30" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="75" y1="30" x2="75" y2="60" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="60" y1="60" x2="60" y2="90" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="45" y1="90" x2="45" y2="120" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="30" y1="120" x2="30" y2="150" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="15" y1="150" x2="15" y2="180" stroke="#a3402d" strokeWidth="1.2"/>
-        <path d="M68,72 Q72,65 76,72" fill="none" stroke="#b68235" strokeWidth="1.2"/>
-        <path d="M53,102 Q57,95 61,102" fill="none" stroke="#b68235" strokeWidth="1.2"/>
-        <path d="M38,132 Q42,125 46,132" fill="none" stroke="#b68235" strokeWidth="1.2"/>
-        <path d="M23,162 Q27,155 31,162" fill="none" stroke="#b68235" strokeWidth="1.2"/>
+        <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#9b3420" strokeWidth="2.4"/>
+        <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#9b3420" strokeWidth="2"/>
+        <line x1="90" y1="0" x2="90" y2="30" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="75" y1="30" x2="75" y2="60" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="60" y1="60" x2="60" y2="90" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="45" y1="90" x2="45" y2="120" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="30" y1="120" x2="30" y2="150" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="15" y1="150" x2="15" y2="180" stroke="#9b3420" strokeWidth="1.2"/>
+        <path d="M68,72 Q72,65 76,72" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
+        <path d="M53,102 Q57,95 61,102" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
+        <path d="M38,132 Q42,125 46,132" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
+        <path d="M23,162 Q27,155 31,162" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
       </svg>
 
       {/* Chand Baori stepwell — right (mirrored) */}
       <svg className="login-motif login-motif-stepwell-r" width="110" height="580" viewBox="0 0 110 580" style={{ position: 'absolute', right: 18, top: 60, transform: 'scaleX(-1)' }} aria-hidden="true">
-        <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#a3402d" strokeWidth="2.4"/>
-        <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#a3402d" strokeWidth="2"/>
-        <line x1="90" y1="0" x2="90" y2="30" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="75" y1="30" x2="75" y2="60" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="60" y1="60" x2="60" y2="90" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="45" y1="90" x2="45" y2="120" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="30" y1="120" x2="30" y2="150" stroke="#a3402d" strokeWidth="1.2"/>
-        <line x1="15" y1="150" x2="15" y2="180" stroke="#a3402d" strokeWidth="1.2"/>
-        <path d="M68,72 Q72,65 76,72" fill="none" stroke="#b68235" strokeWidth="1.2"/>
-        <path d="M53,102 Q57,95 61,102" fill="none" stroke="#b68235" strokeWidth="1.2"/>
-        <path d="M38,132 Q42,125 46,132" fill="none" stroke="#b68235" strokeWidth="1.2"/>
-        <path d="M23,162 Q27,155 31,162" fill="none" stroke="#b68235" strokeWidth="1.2"/>
+        <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#9b3420" strokeWidth="2.4"/>
+        <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#9b3420" strokeWidth="2"/>
+        <line x1="90" y1="0" x2="90" y2="30" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="75" y1="30" x2="75" y2="60" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="60" y1="60" x2="60" y2="90" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="45" y1="90" x2="45" y2="120" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="30" y1="120" x2="30" y2="150" stroke="#9b3420" strokeWidth="1.2"/>
+        <line x1="15" y1="150" x2="15" y2="180" stroke="#9b3420" strokeWidth="1.2"/>
+        <path d="M68,72 Q72,65 76,72" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
+        <path d="M53,102 Q57,95 61,102" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
+        <path d="M38,132 Q42,125 46,132" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
+        <path d="M23,162 Q27,155 31,162" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
       </svg>
 
       {/* Central lotus mandala — proper petals from handoff */}
       <svg className="login-motif login-motif-lotus" width="600" height="600" viewBox="0 0 360 360" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} aria-hidden="true">
-        <circle cx="180" cy="180" r="175" fill="none" stroke="#a3402d" strokeWidth="1.8"/>
-        <circle cx="180" cy="180" r="160" fill="none" stroke="#b68235" strokeWidth="1.2"/>
+        <circle cx="180" cy="180" r="175" fill="none" stroke="#9b3420" strokeWidth="1.8"/>
+        <circle cx="180" cy="180" r="160" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
         {/* Cardinal petals — gold */}
-        <path d="M180,20 Q195,80 180,120 Q165,80 180,20Z" fill="none" stroke="#b68235" strokeWidth="1.6"/>
-        <path d="M180,340 Q195,280 180,240 Q165,280 180,340Z" fill="none" stroke="#b68235" strokeWidth="1.6"/>
-        <path d="M20,180 Q80,165 120,180 Q80,195 20,180Z" fill="none" stroke="#b68235" strokeWidth="1.6"/>
-        <path d="M340,180 Q280,165 240,180 Q280,195 340,180Z" fill="none" stroke="#b68235" strokeWidth="1.6"/>
+        <path d="M180,20 Q195,80 180,120 Q165,80 180,20Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
+        <path d="M180,340 Q195,280 180,240 Q165,280 180,340Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
+        <path d="M20,180 Q80,165 120,180 Q80,195 20,180Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
+        <path d="M340,180 Q280,165 240,180 Q280,195 340,180Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
         {/* Diagonal petals — terracotta */}
-        <path d="M67,67 Q120,100 120,120 Q100,120 67,67Z" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <path d="M293,67 Q240,100 240,120 Q260,120 293,67Z" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <path d="M67,293 Q120,260 120,240 Q100,240 67,293Z" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <path d="M293,293 Q240,260 240,240 Q260,240 293,293Z" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
+        <path d="M67,67 Q120,100 120,120 Q100,120 67,67Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <path d="M293,67 Q240,100 240,120 Q260,120 293,67Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <path d="M67,293 Q120,260 120,240 Q100,240 67,293Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <path d="M293,293 Q240,260 240,240 Q260,240 293,293Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
         {/* Intermediate petals */}
-        <path d="M110,30 Q140,90 135,130 Q115,100 110,30Z" fill="none" stroke="#a3402d" strokeWidth="1.2"/>
-        <path d="M250,30 Q220,90 225,130 Q245,100 250,30Z" fill="none" stroke="#a3402d" strokeWidth="1.2"/>
-        <path d="M110,330 Q140,270 135,230 Q115,260 110,330Z" fill="none" stroke="#a3402d" strokeWidth="1.2"/>
-        <path d="M250,330 Q220,270 225,230 Q245,260 250,330Z" fill="none" stroke="#a3402d" strokeWidth="1.2"/>
+        <path d="M110,30 Q140,90 135,130 Q115,100 110,30Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
+        <path d="M250,30 Q220,90 225,130 Q245,100 250,30Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
+        <path d="M110,330 Q140,270 135,230 Q115,260 110,330Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
+        <path d="M250,330 Q220,270 225,230 Q245,260 250,330Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
         {/* Inner rings */}
-        <circle cx="180" cy="180" r="55" fill="none" stroke="#b68235" strokeWidth="1.6"/>
-        <circle cx="180" cy="180" r="40" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <circle cx="180" cy="180" r="18" fill="none" stroke="#b68235" strokeWidth="1.5"/>
-        <circle cx="180" cy="180" r="6" fill="#b68235" opacity="0.3"/>
+        <circle cx="180" cy="180" r="55" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
+        <circle cx="180" cy="180" r="40" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <circle cx="180" cy="180" r="18" fill="none" stroke="#c48a1a" strokeWidth="1.5"/>
+        <circle cx="180" cy="180" r="6" fill="#c48a1a" opacity="0.3"/>
       </svg>
 
       {/* Top pavilion — arched colonnade */}
       <svg className="login-motif login-motif-pavilion" width="180" height="50" viewBox="0 0 180 50" style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)' }} aria-hidden="true">
-        <path d="M30,50 L30,25 Q30,8 60,8 L120,8 Q150,8 150,25 L150,50" fill="none" stroke="#a3402d" strokeWidth="2"/>
-        <path d="M60,8 L60,0" stroke="#a3402d" strokeWidth="1.4" fill="none"/>
-        <path d="M90,8 L90,0" stroke="#a3402d" strokeWidth="1.4" fill="none"/>
-        <path d="M120,8 L120,0" stroke="#a3402d" strokeWidth="1.4" fill="none"/>
-        <path d="M80,8 Q90,0 100,8" fill="none" stroke="#b68235" strokeWidth="1.5"/>
+        <path d="M30,50 L30,25 Q30,8 60,8 L120,8 Q150,8 150,25 L150,50" fill="none" stroke="#9b3420" strokeWidth="2"/>
+        <path d="M60,8 L60,0" stroke="#9b3420" strokeWidth="1.4" fill="none"/>
+        <path d="M90,8 L90,0" stroke="#9b3420" strokeWidth="1.4" fill="none"/>
+        <path d="M120,8 L120,0" stroke="#9b3420" strokeWidth="1.4" fill="none"/>
+        <path d="M80,8 Q90,0 100,8" fill="none" stroke="#c48a1a" strokeWidth="1.5"/>
       </svg>
 
       {/* Bottom pool — stepped corners */}
       <svg className="login-motif login-motif-pool" width="200" height="60" viewBox="0 0 200 60" style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)' }} aria-hidden="true">
-        <rect x="20" y="5" width="160" height="50" rx="2" fill="none" stroke="#a3402d" strokeWidth="2"/>
-        <rect x="30" y="12" width="140" height="36" rx="1" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <line x1="40" y1="30" x2="160" y2="30" stroke="#b68235" strokeWidth="1" strokeDasharray="4,5"/>
-        <path d="M20,5 L10,5 L10,15 L5,15 L5,25" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <path d="M180,5 L190,5 L190,15 L195,15 L195,25" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <path d="M20,55 L10,55 L10,45 L5,45 L5,35" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
-        <path d="M180,55 L190,55 L190,45 L195,45 L195,35" fill="none" stroke="#a3402d" strokeWidth="1.4"/>
+        <rect x="20" y="5" width="160" height="50" rx="2" fill="none" stroke="#9b3420" strokeWidth="2"/>
+        <rect x="30" y="12" width="140" height="36" rx="1" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <line x1="40" y1="30" x2="160" y2="30" stroke="#c48a1a" strokeWidth="1" strokeDasharray="4,5"/>
+        <path d="M20,5 L10,5 L10,15 L5,15 L5,25" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <path d="M180,5 L190,5 L190,15 L195,15 L195,25" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <path d="M20,55 L10,55 L10,45 L5,45 L5,35" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
+        <path d="M180,55 L190,55 L190,45 L195,45 L195,35" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
       </svg>
 
       {/* Gold ornament above logo */}
       <svg className="login-ornament-top" width="120" height="16" viewBox="0 0 120 16" style={{ marginBottom: 22, opacity: 0.7 }} aria-hidden="true">
-        <line x1="0" y1="8" x2="42" y2="8" stroke="#b68235" strokeWidth="1.2"/>
-        <circle cx="60" cy="8" r="5" fill="none" stroke="#b68235" strokeWidth="1.4"/>
-        <circle cx="60" cy="8" r="2" fill="#b68235" opacity="0.6"/>
-        <line x1="78" y1="8" x2="120" y2="8" stroke="#b68235" strokeWidth="1.2"/>
+        <line x1="0" y1="8" x2="42" y2="8" stroke="#c48a1a" strokeWidth="1.2"/>
+        <circle cx="60" cy="8" r="5" fill="none" stroke="#c48a1a" strokeWidth="1.4"/>
+        <circle cx="60" cy="8" r="2" fill="#c48a1a" opacity="0.6"/>
+        <line x1="78" y1="8" x2="120" y2="8" stroke="#c48a1a" strokeWidth="1.2"/>
       </svg>
 
       <div className="login-card" style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(12px)', transition: 'all 0.7s cubic-bezier(0.23, 1, 0.32, 1) 0.3s' }}>
@@ -178,18 +178,18 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
           {tab === 'admin' ? (
             <>
               <div className="form-group">
-                <label>Email</label>
-                <input className="form-control" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@society.example" autoFocus />
+                <label htmlFor="login-email">Email</label>
+                <input id="login-email" className="form-control" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@society.example" autoFocus />
               </div>
               <div className="form-group">
-                <label>Password</label>
-                <input className="form-control" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={adminMode === 'signin' ? 'Enter admin password' : 'Choose a password (min 6 chars)'} />
+                <label htmlFor="login-password">Password</label>
+                <input id="login-password" className="form-control" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={adminMode === 'signin' ? 'Enter admin password' : 'Choose a password (min 6 chars)'} />
               </div>
             </>
           ) : (
             <div className="form-group">
-              <label>Flat Number</label>
-              <input className="form-control" value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101" autoFocus />
+              <label htmlFor="login-flat-number">Flat Number</label>
+              <input id="login-flat-number" className="form-control" value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101" autoFocus />
             </div>
           )}
           <button className="btn btn-outline" type="submit" disabled={busy} style={{ width: '100%', padding: 12, fontSize: 15, fontFamily: "'Yeseva One', serif" }}>
@@ -209,9 +209,9 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
 
       {/* Diamond ornament below card */}
       <svg className="login-ornament-bottom" width="80" height="16" viewBox="0 0 80 16" style={{ marginTop: 28, opacity: 0.5 }} aria-hidden="true">
-        <line x1="0" y1="8" x2="28" y2="8" stroke="#a3402d" strokeWidth="1.2"/>
-        <rect x="33" y="3" width="14" height="10" rx="1" fill="none" stroke="#a3402d" strokeWidth="1.4" transform="rotate(45,40,8)"/>
-        <line x1="52" y1="8" x2="80" y2="8" stroke="#a3402d" strokeWidth="1.2"/>
+        <line x1="0" y1="8" x2="28" y2="8" stroke="#9b3420" strokeWidth="1.2"/>
+        <rect x="33" y="3" width="14" height="10" rx="1" fill="none" stroke="#9b3420" strokeWidth="1.4" transform="rotate(45,40,8)"/>
+        <line x1="52" y1="8" x2="80" y2="8" stroke="#9b3420" strokeWidth="1.2"/>
       </svg>
     </div>
   );
@@ -243,8 +243,8 @@ function SetupSociety({ onCreate }) {
         {error && <div className="form-error" role="alert">{error}</div>}
         <form onSubmit={submit}>
           <div className="form-group">
-            <label>Society Name</label>
-            <input className="form-control" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Green Valley Residency" autoFocus />
+            <label htmlFor="setup-society-name">Society Name</label>
+            <input id="setup-society-name" className="form-control" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Green Valley Residency" autoFocus />
           </div>
           <button className="btn btn-primary" type="submit" disabled={busy} style={{ width: '100%', padding: '12px 18px', fontSize: 14, fontWeight: 600 }}>
             {busy ? 'Creating…' : 'Create Society'}
@@ -429,7 +429,7 @@ export default function App() {
       </aside>
 
       <main className="main-content">
-        <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} style={{ marginBottom: 16 }}>
+        <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" style={{ marginBottom: 16 }}>
           <Menu size={20} strokeWidth={1.5} />
         </button>
         <div className="page-enter" key={pageKey}>
