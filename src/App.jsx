@@ -1,5 +1,8 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { LayoutGrid, Building2, Users, Receipt, CreditCard, Wallet, Bell, BarChart3, LogOut, Menu } from 'lucide-react';
+import ErrorBoundary from './components/ErrorBoundary';
+import ToastContainer from './components/Toast';
+import { showToast } from './components/Toast';
 import { supabase } from './lib/supabaseClient';
 import { signInAdmin, signUpAdmin, signOut, getMyProfile, createSociety, getResidentPortal, fetchAllData } from './lib/api';
 
@@ -71,16 +74,12 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
 
   return (
     <div className="login-page">
-      {/* Terracotta frame — left & right vertical edges */}
       <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 4, background: 'var(--frame-v)', zIndex: 10 }} />
       <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 4, background: 'var(--frame-v)', zIndex: 10 }} />
-      {/* Inner hairline border */}
       <div className="login-hairline" />
-      {/* Floating gold dust particles */}
       <span className="login-dust" /><span className="login-dust" /><span className="login-dust" /><span className="login-dust" />
       <span className="login-dust" /><span className="login-dust" /><span className="login-dust" /><span className="login-dust" />
 
-      {/* Chand Baori stepwell — left */}
       <svg className="login-motif login-motif-stepwell-l" width="110" height="580" viewBox="0 0 110 580" style={{ position: 'absolute', left: 18, top: 60 }} aria-hidden="true">
         <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#9b3420" strokeWidth="2.4"/>
         <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#9b3420" strokeWidth="2"/>
@@ -96,7 +95,6 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
         <path d="M23,162 Q27,155 31,162" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
       </svg>
 
-      {/* Chand Baori stepwell — right (mirrored) */}
       <svg className="login-motif login-motif-stepwell-r" width="110" height="580" viewBox="0 0 110 580" style={{ position: 'absolute', right: 18, top: 60, transform: 'scaleX(-1)' }} aria-hidden="true">
         <path d="M110,0 L90,0 L90,30 L75,30 L75,60 L60,60 L60,90 L45,90 L45,120 L30,120 L30,150 L15,150 L15,180 L0,180 L0,210 L15,210 L15,240 L30,240 L30,270 L45,270 L45,300 L60,300 L60,330 L75,330 L75,360 L90,360 L90,390 L110,390" fill="none" stroke="#9b3420" strokeWidth="2.4"/>
         <path d="M110,390 L90,390 L90,420 L75,420 L75,450 L60,450 L60,480 L45,480 L45,510 L30,510 L30,540 L45,540 L45,570 L60,570 L60,580" fill="none" stroke="#9b3420" strokeWidth="2"/>
@@ -112,33 +110,27 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
         <path d="M23,162 Q27,155 31,162" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
       </svg>
 
-      {/* Central lotus mandala — proper petals from handoff */}
       <svg className="login-motif login-motif-lotus" width="600" height="600" viewBox="0 0 360 360" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }} aria-hidden="true">
         <circle cx="180" cy="180" r="175" fill="none" stroke="#9b3420" strokeWidth="1.8"/>
         <circle cx="180" cy="180" r="160" fill="none" stroke="#c48a1a" strokeWidth="1.2"/>
-        {/* Cardinal petals — gold */}
         <path d="M180,20 Q195,80 180,120 Q165,80 180,20Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
         <path d="M180,340 Q195,280 180,240 Q165,280 180,340Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
         <path d="M20,180 Q80,165 120,180 Q80,195 20,180Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
         <path d="M340,180 Q280,165 240,180 Q280,195 340,180Z" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
-        {/* Diagonal petals — terracotta */}
         <path d="M67,67 Q120,100 120,120 Q100,120 67,67Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
         <path d="M293,67 Q240,100 240,120 Q260,120 293,67Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
         <path d="M67,293 Q120,260 120,240 Q100,240 67,293Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
         <path d="M293,293 Q240,260 240,240 Q260,240 293,293Z" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
-        {/* Intermediate petals */}
         <path d="M110,30 Q140,90 135,130 Q115,100 110,30Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
         <path d="M250,30 Q220,90 225,130 Q245,100 250,30Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
         <path d="M110,330 Q140,270 135,230 Q115,260 110,330Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
         <path d="M250,330 Q220,270 225,230 Q245,260 250,330Z" fill="none" stroke="#9b3420" strokeWidth="1.2"/>
-        {/* Inner rings */}
         <circle cx="180" cy="180" r="55" fill="none" stroke="#c48a1a" strokeWidth="1.6"/>
         <circle cx="180" cy="180" r="40" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
         <circle cx="180" cy="180" r="18" fill="none" stroke="#c48a1a" strokeWidth="1.5"/>
         <circle cx="180" cy="180" r="6" fill="#c48a1a" opacity="0.3"/>
       </svg>
 
-      {/* Top pavilion — arched colonnade */}
       <svg className="login-motif login-motif-pavilion" width="180" height="50" viewBox="0 0 180 50" style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)' }} aria-hidden="true">
         <path d="M30,50 L30,25 Q30,8 60,8 L120,8 Q150,8 150,25 L150,50" fill="none" stroke="#9b3420" strokeWidth="2"/>
         <path d="M60,8 L60,0" stroke="#9b3420" strokeWidth="1.4" fill="none"/>
@@ -147,7 +139,6 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
         <path d="M80,8 Q90,0 100,8" fill="none" stroke="#c48a1a" strokeWidth="1.5"/>
       </svg>
 
-      {/* Bottom pool — stepped corners */}
       <svg className="login-motif login-motif-pool" width="200" height="60" viewBox="0 0 200 60" style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)' }} aria-hidden="true">
         <rect x="20" y="5" width="160" height="50" rx="2" fill="none" stroke="#9b3420" strokeWidth="2"/>
         <rect x="30" y="12" width="140" height="36" rx="1" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
@@ -158,7 +149,6 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
         <path d="M180,55 L190,55 L190,45 L195,45 L195,35" fill="none" stroke="#9b3420" strokeWidth="1.4"/>
       </svg>
 
-      {/* Gold ornament above logo */}
       <svg className="login-ornament-top" width="120" height="16" viewBox="0 0 120 16" style={{ marginBottom: 22, opacity: 0.7 }} aria-hidden="true">
         <line x1="0" y1="8" x2="42" y2="8" stroke="#c48a1a" strokeWidth="1.2"/>
         <circle cx="60" cy="8" r="5" fill="none" stroke="#c48a1a" strokeWidth="1.4"/>
@@ -179,17 +169,17 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
             <>
               <div className="form-group">
                 <label htmlFor="login-email">Email</label>
-                <input id="login-email" className="form-control" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@society.example" autoFocus />
+                <input id="login-email" className="form-control" type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@society.example" autoFocus />
               </div>
               <div className="form-group">
                 <label htmlFor="login-password">Password</label>
-                <input id="login-password" className="form-control" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={adminMode === 'signin' ? 'Enter admin password' : 'Choose a password (min 6 chars)'} />
+                <input id="login-password" className="form-control" type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder={adminMode === 'signin' ? 'Enter admin password' : 'Choose a password (min 6 chars)'} />
               </div>
             </>
           ) : (
             <div className="form-group">
               <label htmlFor="login-flat-number">Flat Number</label>
-              <input id="login-flat-number" className="form-control" value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101" autoFocus />
+              <input id="login-flat-number" className="form-control" required value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-101" autoFocus />
             </div>
           )}
           <button className="btn btn-outline" type="submit" disabled={busy} style={{ width: '100%', padding: 12, fontSize: 15, fontFamily: "'Yeseva One', serif" }}>
@@ -207,7 +197,6 @@ function LoginPage({ onAdminSignIn, onAdminSignUp, onResidentLogin }) {
         )}
       </div>
 
-      {/* Diamond ornament below card */}
       <svg className="login-ornament-bottom" width="80" height="16" viewBox="0 0 80 16" style={{ marginTop: 28, opacity: 0.5 }} aria-hidden="true">
         <line x1="0" y1="8" x2="28" y2="8" stroke="#9b3420" strokeWidth="1.2"/>
         <rect x="33" y="3" width="14" height="10" rx="1" fill="none" stroke="#9b3420" strokeWidth="1.4" transform="rotate(45,40,8)"/>
@@ -256,7 +245,7 @@ function SetupSociety({ onCreate }) {
 }
 
 export default function App() {
-  const [authPhase, setAuthPhase] = useState('checking'); // checking | login | setup | admin | resident
+  const [authPhase, setAuthPhase] = useState('checking');
   const [profile, setProfile] = useState(null);
   const [residentPortal, setResidentPortal] = useState(null);
   const [page, setPage] = useState('dashboard');
@@ -272,6 +261,8 @@ export default function App() {
   const [expenses, setExpenses] = useState([]);
   const [notices, setNotices] = useState([]);
 
+  const sessionLock = useRef(false);
+
   const loadAdminData = async () => {
     setDataLoading(true);
     try {
@@ -283,31 +274,44 @@ export default function App() {
       setPayments(data.payments);
       setExpenses(data.expenses);
       setNotices(data.notices);
+    } catch (err) {
+      showToast(err.message || 'Failed to load data. Please refresh.', 'error', 5000);
     } finally {
       setDataLoading(false);
     }
   };
 
   const resolveSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (sessionLock.current) return;
+    sessionLock.current = true;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setAuthPhase('login');
+        return;
+      }
+      const myProfile = await getMyProfile();
+      if (!myProfile) {
+        setAuthPhase('setup');
+        return;
+      }
+      setProfile(myProfile);
+      await loadAdminData();
+      setAuthPhase('admin');
+    } catch (err) {
+      showToast(err.message || 'Session error. Please sign in again.', 'error', 5000);
       setAuthPhase('login');
-      return;
+    } finally {
+      sessionLock.current = false;
     }
-    const myProfile = await getMyProfile();
-    if (!myProfile) {
-      setAuthPhase('setup');
-      return;
-    }
-    setProfile(myProfile);
-    await loadAdminData();
-    setAuthPhase('admin');
   };
 
   useEffect(() => {
     resolveSession();
-    const { data: subscription } = supabase.auth.onAuthStateChange(() => {
-      resolveSession();
+    const { data: subscription } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        resolveSession();
+      }
     });
     return () => subscription.subscription.unsubscribe();
   }, []);
@@ -362,19 +366,23 @@ export default function App() {
 
   if (authPhase === 'resident') {
     return (
-      <Suspense fallback={<PageLoading />}>
-        <ResidentPortal
-          flat={residentPortal.flat}
-          resident={residentPortal.resident}
-          bills={residentPortal.bills}
-          payments={residentPortal.payments}
-          onLogout={handleResidentLogout}
-        />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoading />}>
+          <ResidentPortal
+            flat={residentPortal?.flat}
+            resident={residentPortal?.resident}
+            bills={residentPortal?.bills || []}
+            payments={residentPortal?.payments || []}
+            onLogout={handleResidentLogout}
+          />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   if (dataLoading) return <PageLoading />;
+
+  if (!profile) return <PageLoading />;
 
   const societyId = profile.societyId;
 
@@ -393,51 +401,54 @@ export default function App() {
   };
 
   return (
-    <div className="app-layout">
-      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <h1>Society<span className="logo-accent">Pro</span></h1>
-          <p>Maintenance Management</p>
-        </div>
-        <nav className="sidebar-nav">
-          {NAV_ITEMS.map(item => (
-            <button key={item.key} className={`nav-item ${page === item.key ? 'active' : ''}`} onClick={() => changePage(item.key)}>
-              {item.icon}
-              {item.label}
+    <ErrorBoundary>
+      <div className="app-layout">
+        <ToastContainer />
+        {sidebarOpen && <div className="sidebar-overlay" role="button" aria-label="Close sidebar" tabIndex={-1} onClick={() => setSidebarOpen(false)} />}
+        <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+          <div className="sidebar-header">
+            <h1>Society<span className="logo-accent">Pro</span></h1>
+            <p>Maintenance Management</p>
+          </div>
+          <nav className="sidebar-nav" aria-label="Main navigation">
+            {NAV_ITEMS.map(item => (
+              <button key={item.key} className={`nav-item ${page === item.key ? 'active' : ''}`} onClick={() => changePage(item.key)}>
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          <div className="sidebar-ornament" aria-hidden="true">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="0.5" opacity="0.15"/>
+              <circle cx="40" cy="40" r="28" stroke="currentColor" strokeWidth="0.3" opacity="0.1"/>
+              <path d="M40,8 Q46,22 40,30 Q34,22 40,8Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+              <path d="M40,72 Q46,58 40,50 Q34,58 40,72Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+              <path d="M8,40 Q22,34 30,40 Q22,46 8,40Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+              <path d="M72,40 Q58,34 50,40 Q58,46 72,40Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
+              <circle cx="40" cy="40" r="6" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.15"/>
+              <circle cx="40" cy="40" r="2" fill="currentColor" opacity="0.08"/>
+            </svg>
+          </div>
+          <div className="sidebar-footer">
+            <button className="logout-btn" onClick={handleAdminLogout}>
+              <LogOut size={18} strokeWidth={1.5} />
+              Logout
             </button>
-          ))}
-        </nav>
-        <div className="sidebar-ornament" aria-hidden="true">
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="0.5" opacity="0.15"/>
-            <circle cx="40" cy="40" r="28" stroke="currentColor" strokeWidth="0.3" opacity="0.1"/>
-            <path d="M40,8 Q46,22 40,30 Q34,22 40,8Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
-            <path d="M40,72 Q46,58 40,50 Q34,58 40,72Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
-            <path d="M8,40 Q22,34 30,40 Q22,46 8,40Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
-            <path d="M72,40 Q58,34 50,40 Q58,46 72,40Z" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2"/>
-            <circle cx="40" cy="40" r="6" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.15"/>
-            <circle cx="40" cy="40" r="2" fill="currentColor" opacity="0.08"/>
-          </svg>
-        </div>
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleAdminLogout}>
-            <LogOut size={18} strokeWidth={1.5} />
-            Logout
-          </button>
-        </div>
-      </aside>
+          </div>
+        </aside>
 
-      <main className="main-content">
-        <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" style={{ marginBottom: 16 }}>
-          <Menu size={20} strokeWidth={1.5} />
-        </button>
-        <div className="page-enter" key={pageKey}>
-          <Suspense fallback={<PageLoading />}>
-            {renderPage()}
-          </Suspense>
-        </div>
-      </main>
-    </div>
+        <main className="main-content">
+          <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Open menu" style={{ marginBottom: 16 }}>
+            <Menu size={20} strokeWidth={1.5} />
+          </button>
+          <div className="page-enter" key={pageKey}>
+            <Suspense fallback={<PageLoading />}>
+              {renderPage()}
+            </Suspense>
+          </div>
+        </main>
+      </div>
+    </ErrorBoundary>
   );
 }

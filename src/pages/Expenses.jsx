@@ -1,18 +1,28 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { showToast } from '../components/Toast';
 import { EXPENSE_CATEGORIES } from '../data/mockData';
 import { createExpense } from '../lib/api';
 
 export default function Expenses({ societyId, expenses, setExpenses }) {
+  const today = new Date().toISOString().split('T')[0];
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ category: 'Security', description: '', amount: '', date: '', paidTo: '' });
+  const [form, setForm] = useState({ category: 'Security', description: '', amount: '', date: today, paidTo: '' });
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const fmt = n => '₹' + n.toLocaleString('en-IN');
 
-  const addExpense = async () => {
+  const openAdd = () => {
+    setError('');
+    setForm({ category: 'Security', description: '', amount: '', date: today, paidTo: '' });
+    setShowAdd(true);
+  };
+
+  const addExpense = async (e) => {
+    e?.preventDefault?.();
     const missing = [];
-    if (!form.description) missing.push('Description');
+    if (!form.description.trim()) missing.push('Description');
     if (!form.amount) missing.push('Amount');
     if (!form.date) missing.push('Date');
     if (missing.length) {
@@ -20,13 +30,16 @@ export default function Expenses({ societyId, expenses, setExpenses }) {
       return;
     }
     setError('');
+    setSaving(true);
     try {
       const created = await createExpense(societyId, { ...form, amount: +form.amount });
       setExpenses(prev => [...prev, created]);
       setShowAdd(false);
-      setForm({ category: 'Security', description: '', amount: '', date: '', paidTo: '' });
+      showToast(`Expense of ${fmt(+form.amount)} added`);
     } catch (err) {
       setError(err.message || 'Could not add expense.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -39,7 +52,7 @@ export default function Expenses({ societyId, expenses, setExpenses }) {
     <div>
       <div className="page-header">
         <h2>Expenses</h2>
-        <button className="btn btn-primary" onClick={() => { setError(''); setShowAdd(true); }}>+ Add Expense</button>
+        <button className="btn btn-primary" onClick={openAdd}>+ Add Expense</button>
       </div>
 
       <div className="charts-grid" style={{ marginBottom: 24 }}>
@@ -82,6 +95,7 @@ export default function Expenses({ societyId, expenses, setExpenses }) {
           <table>
             <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Paid To</th><th>Amount</th></tr></thead>
             <tbody>
+              {expenses.length === 0 && <tr><td colSpan={5} className="text-center" style={{ padding: 20, color: 'var(--text-muted)' }}>No expenses recorded</td></tr>}
               {[...expenses].sort((a, b) => b.date.localeCompare(a.date)).map(e => (
                 <tr key={e.id}>
                   <td>{e.date}</td>
@@ -97,32 +111,35 @@ export default function Expenses({ societyId, expenses, setExpenses }) {
       </div>
 
       <Modal show={showAdd} onClose={() => setShowAdd(false)} title="Add Expense"
-        footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={addExpense}>Add</button></>}>
+        footer={<><button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button><button className="btn btn-primary" onClick={addExpense} disabled={saving}>{saving ? 'Adding…' : 'Add'}</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
-        <div className="form-group">
-          <label htmlFor="expense-category">Category</label>
-          <select id="expense-category" className="form-control" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-            {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="expense-description">Description</label>
-          <input id="expense-description" className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-        </div>
-        <div className="form-row">
+        <form onSubmit={addExpense}>
           <div className="form-group">
-            <label htmlFor="expense-amount">Amount (₹)</label>
-            <input id="expense-amount" className="form-control" type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+            <label htmlFor="expense-category">Category</label>
+            <select id="expense-category" className="form-control" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} autoFocus>
+              {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+            </select>
           </div>
           <div className="form-group">
-            <label htmlFor="expense-date">Date</label>
-            <input id="expense-date" className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            <label htmlFor="expense-description">Description <span className="required">*</span></label>
+            <input id="expense-description" className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="e.g. Monthly security guard salary" />
           </div>
-        </div>
-        <div className="form-group">
-          <label htmlFor="expense-paid-to">Paid To</label>
-          <input id="expense-paid-to" className="form-control" value={form.paidTo} onChange={e => setForm({ ...form, paidTo: e.target.value })} />
-        </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="expense-amount">Amount (₹) <span className="required">*</span></label>
+              <input id="expense-amount" className="form-control" type="number" inputMode="numeric" min="1" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="e.g. 15000" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="expense-date">Date <span className="required">*</span></label>
+              <input id="expense-date" className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="expense-paid-to">Paid To</label>
+            <input id="expense-paid-to" className="form-control" value={form.paidTo} onChange={e => setForm({ ...form, paidTo: e.target.value })} placeholder="e.g. ABC Security Services" />
+          </div>
+          <button type="submit" hidden />
+        </form>
       </Modal>
     </div>
   );

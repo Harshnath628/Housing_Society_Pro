@@ -1,4 +1,15 @@
-export default function ResidentPortal({ flat, resident, bills, payments, onLogout }) {
+export default function ResidentPortal({ flat, resident, bills = [], payments = [], onLogout }) {
+  if (!flat) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-page)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', marginBottom: 16 }}>Could not load flat data.</p>
+          <button className="btn btn-primary" onClick={onLogout}>Back to Login</button>
+        </div>
+      </div>
+    );
+  }
+
   const fmt = n => '₹' + n.toLocaleString('en-IN');
   const flatBills = bills.filter(b => b.flatId === flat.id).sort((a, b) => b.month.localeCompare(a.month));
   const flatPayments = payments.filter(p => p.flatId === flat.id);
@@ -9,10 +20,10 @@ export default function ResidentPortal({ flat, resident, bills, payments, onLogo
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
       <div className="resident-header">
-        <h1>Society<span style={{ color: 'var(--accent)' }}>Pro</span> <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: 16 }}>Resident Portal</span></h1>
+        <h1>Society<span style={{ color: 'var(--accent)' }}>Pro</span> <span style={{ color: 'var(--sidebar-text-active, #f5edd9)', fontWeight: 400, fontSize: 16 }}>Resident Portal</span></h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{flat.flatNumber} · {resident?.name || 'Resident'}</span>
-          <button className="btn btn-outline btn-sm" onClick={onLogout}>Logout</button>
+          <span style={{ fontSize: 13, color: 'var(--sidebar-text-active, #f5edd9)' }}>{flat.flatNumber} · {resident?.name || 'Resident'}</span>
+          <button className="btn btn-outline btn-sm" style={{ color: 'var(--sidebar-text-active, #f5edd9)', borderColor: 'rgba(245,237,217,0.3)' }} onClick={onLogout}>Logout</button>
         </div>
       </div>
 
@@ -28,7 +39,7 @@ export default function ResidentPortal({ flat, resident, bills, payments, onLogo
           </div>
           <div className="resident-info-item">
             <label>Area</label>
-            <p>{flat.area} sqft</p>
+            <p>{flat.area ? `${flat.area} sqft` : '—'}</p>
           </div>
           <div className="resident-info-item">
             <label>Outstanding</label>
@@ -76,7 +87,7 @@ export default function ResidentPortal({ flat, resident, bills, payments, onLogo
             <table>
               <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Reference</th><th>Bill Month</th></tr></thead>
               <tbody>
-                {flatPayments.sort((a, b) => b.date.localeCompare(a.date)).map(p => {
+                {[...flatPayments].sort((a, b) => b.date.localeCompare(a.date)).map(p => {
                   const bill = bills.find(b => b.id === p.billId);
                   return (
                     <tr key={p.id}>

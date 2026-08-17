@@ -1,5 +1,6 @@
-const style = getComputedStyle(document.documentElement);
-const css = (v) => style.getPropertyValue(v).trim();
+function css(v) {
+  return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+}
 
 export const getChartTheme = () => ({
   axisColor: css('--text-muted') || 'rgba(58,39,13,0.5)',

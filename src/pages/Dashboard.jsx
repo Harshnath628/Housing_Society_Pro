@@ -20,17 +20,30 @@ export default function Dashboard({ buildings, flats, bills, payments, expenses 
   const t = getChartTheme();
   const totalExpected = bills.reduce((s, b) => s + b.amount, 0);
   const totalCollected = payments.reduce((s, p) => s + p.amount, 0);
+
+  const paymentsByBill = new Map();
+  for (const p of payments) {
+    paymentsByBill.set(p.billId, (paymentsByBill.get(p.billId) || 0) + p.amount);
+  }
   const totalPending = bills.filter(b => b.status !== 'Paid').reduce((s, b) => {
-    const paid = payments.filter(p => p.billId === b.id).reduce((ps, p) => ps + p.amount, 0);
-    return s + (b.totalDue - paid);
+    return s + (b.totalDue - (paymentsByBill.get(b.id) || 0));
   }, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
 
+  const paymentsByFlat = new Map();
+  for (const p of payments) {
+    paymentsByFlat.set(p.flatId, (paymentsByFlat.get(p.flatId) || 0) + p.amount);
+  }
+  const billsByFlat = new Map();
+  for (const b of bills) {
+    billsByFlat.set(b.flatId, (billsByFlat.get(b.flatId) || 0) + b.amount);
+  }
+
   const buildingWise = buildings.map(b => {
-    const bFlats = flats.filter(f => f.buildingId === b.id);
-    const flatIds = bFlats.map(f => f.id);
-    const collected = payments.filter(p => flatIds.includes(p.flatId)).reduce((s, p) => s + p.amount, 0);
-    const expected = bills.filter(bl => flatIds.includes(bl.flatId)).reduce((s, bl) => s + bl.amount, 0);
+    const flatIds = new Set(flats.filter(f => f.buildingId === b.id).map(f => f.id));
+    let collected = 0, expected = 0;
+    for (const [fid, amt] of paymentsByFlat) { if (flatIds.has(fid)) collected += amt; }
+    for (const [fid, amt] of billsByFlat) { if (flatIds.has(fid)) expected += amt; }
     return { name: b.name, Collected: collected, Expected: expected };
   });
 
@@ -38,12 +51,17 @@ export default function Dashboard({ buildings, flats, bills, payments, expenses 
   expenses.forEach(e => { expenseByCategory[e.category] = (expenseByCategory[e.category] || 0) + e.amount; });
   const pieData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
 
+  const billedByFlat = new Map();
+  for (const b of bills) {
+    billedByFlat.set(b.flatId, (billedByFlat.get(b.flatId) || 0) + b.totalDue);
+  }
+  const paidByFlat = new Map();
+  for (const p of payments) {
+    paidByFlat.set(p.flatId, (paidByFlat.get(p.flatId) || 0) + p.amount);
+  }
   const topDefaulters = flats.map(f => {
-    const flatBills = bills.filter(b => b.flatId === f.id);
-    const flatPayments = payments.filter(p => p.flatId === f.id);
-    const totalBilled = flatBills.reduce((s, b) => s + b.totalDue, 0);
-    const totalPaid = flatPayments.reduce((s, p) => s + p.amount, 0);
-    return { flat: f.flatNumber, owner: f.ownerName || '—', outstanding: totalBilled - totalPaid };
+    const outstanding = (billedByFlat.get(f.id) || 0) - (paidByFlat.get(f.id) || 0);
+    return { flat: f.flatNumber, owner: f.ownerName || '—', outstanding };
   }).filter(d => d.outstanding > 0).sort((a, b) => b.outstanding - a.outstanding).slice(0, 5);
 
   const fmt = n => '₹' + n.toLocaleString('en-IN');
@@ -59,7 +77,7 @@ export default function Dashboard({ buildings, flats, bills, payments, expenses 
           { label: 'Pending Amount', value: fmt(totalPending), sub: `from ${bills.filter(b => b.status !== 'Paid').length} unpaid bills`, cls: 'warning' },
           { label: 'Total Expenses', value: fmt(totalExpenses), sub: `Net: ${fmt(totalCollected - totalExpenses)}`, cls: 'danger' },
         ].map((kpi, i) => (
-          <div className={`kpi-card ${kpi.cls}`} key={i} style={{ '--card-index': i }}>
+          <div className={`kpi-card ${kpi.cls}`} key={kpi.label} style={{ '--card-index': i }}>
             <div className="kpi-label">{kpi.label}</div>
             <div className="kpi-value">{kpi.value}</div>
             <div className="kpi-sub">{kpi.sub}</div>
@@ -90,7 +108,7 @@ export default function Dashboard({ buildings, flats, bills, payments, expenses 
               <PieChart>
                 <Pie data={pieData} cx="50%" cy="50%" outerRadius={100} innerRadius={50} dataKey="value" strokeWidth={0}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  {pieData.map((entry, i) => <Cell key={entry.name} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
               </PieChart>
@@ -106,7 +124,7 @@ export default function Dashboard({ buildings, flats, bills, payments, expenses 
             <thead><tr><th>#</th><th>Flat</th><th>Owner</th><th>Outstanding</th></tr></thead>
             <tbody>
               {topDefaulters.map((d, i) => (
-                <tr key={i}>
+                <tr key={d.flat}>
                   <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
                   <td><span className="font-mono" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.flat}</span></td>
                   <td>{d.owner}</td>

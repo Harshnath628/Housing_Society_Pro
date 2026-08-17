@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#141922"/><rect x="0.5" y="0.5" width="31" height="31" rx="6.5" fill="none" stroke="#5b8def" stroke-opacity="0.3"/><path d="M8 24V10l8-4v18M24 24V14l-8-4" fill="none" stroke="#5b8def" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="14" r="1.5" fill="#5b8def"/><circle cx="12" cy="19" r="1.5" fill="#5b8def"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#9b3420"/>
+  <text x="10" y="22" font-family="serif" font-size="18" font-weight="bold" fill="#f5edd9">S</text>
+  <text x="20" y="22" font-family="serif" font-size="14" font-weight="bold" fill="#c48a1a">P</text>
+</svg>

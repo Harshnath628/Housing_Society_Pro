@@ -1,18 +1,29 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { showToast } from '../components/Toast';
 import { createPayment, updateBillStatus } from '../lib/api';
 
 export default function Payments({ societyId, flats, bills, setBills, payments, setPayments }) {
+  const today = new Date().toISOString().split('T')[0];
   const [showRecord, setShowRecord] = useState(false);
-  const [form, setForm] = useState({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: '' });
+  const [form, setForm] = useState({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: today });
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const fmt = n => '₹' + n.toLocaleString('en-IN');
 
   const pendingBills = bills.filter(b => b.status !== 'Paid');
   const selectedFlatBills = form.flatId ? pendingBills.filter(b => b.flatId === +form.flatId) : [];
+  const sortedFlats = [...flats].sort((a, b) => a.flatNumber.localeCompare(b.flatNumber, undefined, { numeric: true }));
 
-  const recordPayment = async () => {
+  const openRecord = () => {
+    setError('');
+    setForm({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: today });
+    setShowRecord(true);
+  };
+
+  const recordPayment = async (e) => {
+    e?.preventDefault?.();
     const missing = [];
     if (!form.flatId) missing.push('Flat');
     if (!form.billId) missing.push('Bill');
@@ -27,7 +38,14 @@ export default function Payments({ societyId, flats, bills, setBills, payments, 
       setError('The selected bill could not be found. Please choose the bill again.');
       return;
     }
+    const totalAlreadyPaid = payments.filter(p => p.billId === bill.id).reduce((s, p) => s + p.amount, 0);
+    const remaining = bill.totalDue - totalAlreadyPaid;
+    if (+form.amount > remaining) {
+      setError(`Amount exceeds outstanding balance of ₹${remaining.toLocaleString('en-IN')}. Adjust the amount.`);
+      return;
+    }
     setError('');
+    setSaving(true);
 
     try {
       const created = await createPayment(societyId, {
@@ -47,9 +65,12 @@ export default function Payments({ societyId, flats, bills, setBills, payments, 
       setBills(prev => prev.map(b => b.id === bill.id ? updatedBill : b));
 
       setShowRecord(false);
-      setForm({ flatId: '', billId: '', amount: '', mode: 'UPI', reference: '', date: '' });
+      const flat = flats.find(f => f.id === +form.flatId);
+      showToast(`Payment of ${fmt(+form.amount)} recorded for ${flat?.flatNumber || 'flat'}`);
     } catch (err) {
       setError(err.message || 'Could not record payment.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -59,7 +80,7 @@ export default function Payments({ societyId, flats, bills, setBills, payments, 
     <div>
       <div className="page-header">
         <h2>Payments</h2>
-        <button className="btn btn-success" onClick={() => { setError(''); setShowRecord(true); }}>+ Record Payment</button>
+        <button className="btn btn-success" onClick={openRecord}>+ Record Payment</button>
       </div>
 
       <div className="card">
@@ -90,53 +111,58 @@ export default function Payments({ societyId, flats, bills, setBills, payments, 
       </div>
 
       <Modal show={showRecord} onClose={() => setShowRecord(false)} title="Record Payment"
-        footer={<><button className="btn btn-outline" onClick={() => setShowRecord(false)}>Cancel</button><button className="btn btn-success" onClick={recordPayment}>Record</button></>}>
+        footer={<><button className="btn btn-outline" onClick={() => setShowRecord(false)}>Cancel</button><button className="btn btn-success" onClick={recordPayment} disabled={saving}>{saving ? 'Recording…' : 'Record'}</button></>}>
         {error && <div className="form-error" role="alert">{error}</div>}
-        <div className="form-group">
-          <label htmlFor="payment-flat">Flat</label>
-          <select id="payment-flat" className="form-control" value={form.flatId} onChange={e => setForm({ ...form, flatId: e.target.value, billId: '' })}>
-            <option value="">Select Flat</option>
-            {flats.map(f => <option key={f.id} value={f.id}>{f.flatNumber}</option>)}
-          </select>
-        </div>
-        {form.flatId && (
+        <form onSubmit={recordPayment}>
           <div className="form-group">
-            <label htmlFor="payment-bill">Pending Bill</label>
-            <select id="payment-bill" className="form-control" value={form.billId} onChange={e => {
-              const bill = bills.find(b => b.id === +e.target.value);
-              const paid = bill ? payments.filter(p => p.billId === bill.id).reduce((s, p) => s + p.amount, 0) : 0;
-              setForm({ ...form, billId: e.target.value, amount: bill ? (bill.totalDue - paid).toString() : '' });
-            }}>
-              <option value="">Select Bill</option>
-              {selectedFlatBills.map(b => {
-                const paid = payments.filter(p => p.billId === b.id).reduce((s, p) => s + p.amount, 0);
-                return <option key={b.id} value={b.id}>{b.month} — Due: {fmt(b.totalDue - paid)}</option>;
-              })}
+            <label htmlFor="payment-flat">Flat <span className="required">*</span></label>
+            <select id="payment-flat" className="form-control" value={form.flatId} onChange={e => setForm({ ...form, flatId: e.target.value, billId: '' })} autoFocus>
+              <option value="">Select flat…</option>
+              {sortedFlats.map(f => <option key={f.id} value={f.id}>{f.flatNumber}</option>)}
             </select>
           </div>
-        )}
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="payment-amount">Amount (₹)</label>
-            <input id="payment-amount" className="form-control" type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+          {form.flatId && (
+            <div className="form-group">
+              <label htmlFor="payment-bill">Pending Bill <span className="required">*</span></label>
+              <select id="payment-bill" className="form-control" value={form.billId} onChange={e => {
+                const bill = bills.find(b => b.id === +e.target.value);
+                const paid = bill ? payments.filter(p => p.billId === bill.id).reduce((s, p) => s + p.amount, 0) : 0;
+                setForm({ ...form, billId: e.target.value, amount: bill ? (bill.totalDue - paid).toString() : '' });
+              }}>
+                <option value="">Select bill…</option>
+                {selectedFlatBills.map(b => {
+                  const paid = payments.filter(p => p.billId === b.id).reduce((s, p) => s + p.amount, 0);
+                  return <option key={b.id} value={b.id}>{b.month} — Due: {fmt(b.totalDue - paid)}</option>;
+                })}
+              </select>
+              {selectedFlatBills.length === 0 && <div className="form-hint">No pending bills for this flat.</div>}
+            </div>
+          )}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="payment-amount">Amount (₹) <span className="required">*</span></label>
+              <input id="payment-amount" className="form-control" type="number" inputMode="numeric" min="1" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="e.g. 5000" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="payment-mode">Mode</label>
+              <select id="payment-mode" className="form-control" value={form.mode} onChange={e => setForm({ ...form, mode: e.target.value })}>
+                <option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option>
+              </select>
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="payment-mode">Mode</label>
-            <select id="payment-mode" className="form-control" value={form.mode} onChange={e => setForm({ ...form, mode: e.target.value })}>
-              <option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option>
-            </select>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="payment-reference">Reference</label>
+              <input id="payment-reference" className="form-control" value={form.reference} onChange={e => setForm({ ...form, reference: e.target.value })} placeholder="e.g. TXN123456" />
+              <div className="form-hint">Auto-generated if left empty.</div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="payment-date">Date <span className="required">*</span></label>
+              <input id="payment-date" className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+            </div>
           </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="payment-reference">Reference</label>
-            <input id="payment-reference" className="form-control" value={form.reference} onChange={e => setForm({ ...form, reference: e.target.value })} placeholder="Optional" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="payment-date">Date</label>
-            <input id="payment-date" className="form-control" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
-          </div>
-        </div>
+          <button type="submit" hidden />
+        </form>
       </Modal>
     </div>
   );

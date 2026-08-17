@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
+import { showToast } from '../components/Toast';
 import { createFlat, createResident, updateResident as updateResidentApi, updateFlatOwner } from '../lib/api';
 
 export default function FlatsResidents({ societyId, buildings, flats, setFlats, residents, setResidents, bills, payments }) {
@@ -10,6 +11,7 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
   const [showStatement, setShowStatement] = useState(null);
   const [showEditOwner, setShowEditOwner] = useState(null);
   const [selectedFlat, setSelectedFlat] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [flatForm, setFlatForm] = useState({ buildingId: '', flatNumber: '', floor: '', type: '2BHK', area: '', ownerName: '', ownerMobile: '' });
   const [flatError, setFlatError] = useState('');
@@ -20,34 +22,39 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
   const filtered = filterBuilding === 'all' ? flats : flats.filter(f => f.buildingId === +filterBuilding);
   const fmt = n => '₹' + n.toLocaleString('en-IN');
 
-  const addFlat = async () => {
+  const addFlat = async (e) => {
+    e?.preventDefault?.();
     const missing = [];
     if (!flatForm.buildingId) missing.push('Building');
-    if (!flatForm.flatNumber) missing.push('Flat Number');
+    if (!flatForm.flatNumber.trim()) missing.push('Flat Number');
     if (!flatForm.floor) missing.push('Floor');
     if (missing.length) {
-      setFlatError(`Enter ${missing.join(', ')} to continue.`);
+      setFlatError(`Select ${missing.join(', ')} to continue.`);
       return;
     }
     setFlatError('');
+    setSaving(true);
     try {
       const created = await createFlat(societyId, {
-        buildingId: +flatForm.buildingId, flatNumber: flatForm.flatNumber,
+        buildingId: +flatForm.buildingId, flatNumber: flatForm.flatNumber.trim(),
         floor: +flatForm.floor, type: flatForm.type, area: +flatForm.area || 0,
-        ownerName: flatForm.ownerName, ownerMobile: flatForm.ownerMobile
+        ownerName: flatForm.ownerName.trim(), ownerMobile: flatForm.ownerMobile.trim()
       });
       setFlats(prev => [...prev, created]);
       setShowAddFlat(false);
       setFlatForm({ buildingId: '', flatNumber: '', floor: '', type: '2BHK', area: '', ownerName: '', ownerMobile: '' });
+      showToast(`Flat ${created.flatNumber} added`);
     } catch (err) {
       setFlatError(err.message || 'Could not add flat.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const validateResidentForm = () => {
     const missing = [];
-    if (!residentForm.name) missing.push('Name');
-    if (!residentForm.phone) missing.push('Phone');
+    if (!residentForm.name.trim()) missing.push('Name');
+    if (!residentForm.phone.trim()) missing.push('Phone');
     if (missing.length) {
       setResidentError(`Enter ${missing.join(' and ')} to continue.`);
       return false;
@@ -56,30 +63,40 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
     return true;
   };
 
-  const addResident = async () => {
+  const addResident = async (e) => {
+    e?.preventDefault?.();
     if (!validateResidentForm()) return;
+    setSaving(true);
     try {
       const created = await createResident(societyId, selectedFlat.id, residentForm);
       setResidents(prev => [...prev, created]);
       setShowAddResident(false);
+      showToast(`${residentForm.name} added to ${selectedFlat.flatNumber}`);
     } catch (err) {
       setResidentError(err.message || 'Could not add resident.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const saveEditResident = async () => {
+  const saveEditResident = async (e) => {
+    e?.preventDefault?.();
     if (!validateResidentForm()) return;
+    setSaving(true);
     try {
       const updated = await updateResidentApi(showEditResident.id, residentForm);
       setResidents(prev => prev.map(r => r.id === showEditResident.id ? updated : r));
       setShowEditResident(null);
+      showToast('Resident updated');
     } catch (err) {
       setResidentError(err.message || 'Could not save resident.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const openEditResident = (r) => {
-    setResidentForm({ name: r.name, phone: r.phone, email: r.email, type: r.type, moveInDate: r.moveInDate });
+    setResidentForm({ name: r.name, phone: r.phone, email: r.email, type: r.type, moveInDate: r.moveInDate || '' });
     setResidentError('');
     setShowEditResident(r);
   };
@@ -96,13 +113,18 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
     setShowEditOwner(flat);
   };
 
-  const saveOwner = async () => {
+  const saveOwner = async (e) => {
+    e?.preventDefault?.();
+    setSaving(true);
     try {
-      const updated = await updateFlatOwner(showEditOwner.id, ownerForm.ownerName, ownerForm.ownerMobile);
+      const updated = await updateFlatOwner(showEditOwner.id, ownerForm.ownerName.trim(), ownerForm.ownerMobile.trim());
       setFlats(prev => prev.map(f => f.id === showEditOwner.id ? updated : f));
       setShowEditOwner(null);
+      showToast('Owner details saved');
     } catch (err) {
-      alert(err.message || 'Could not save owner details.');
+      showToast(err.message || 'Could not save owner details.', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -147,14 +169,14 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
             <tbody>
               {filtered.map(f => {
                 const building = buildings.find(b => b.id === f.buildingId);
-                const resident = residents.find(r => r.flatId === f.id);
+                const flatResidents = residents.filter(r => r.flatId === f.id);
                 return (
                   <tr key={f.id}>
                     <td><span className="font-mono" style={{ fontWeight: 600 }}>{f.flatNumber}</span></td>
                     <td>{building?.name || '—'}</td>
                     <td>{f.floor}</td>
                     <td><span className="badge badge-primary">{f.type}</span></td>
-                    <td>{f.area}</td>
+                    <td>{f.area || '—'}</td>
                     <td>
                       {f.ownerName ? (
                         <div>
@@ -167,11 +189,16 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
                       )}
                     </td>
                     <td>
-                      {resident ? (
-                        <div>
-                          <div style={{ fontWeight: 500 }}>{resident.name}</div>
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{resident.type} · {resident.phone}</div>
-                          <button className="btn btn-xs btn-outline" style={{ marginTop: 4 }} onClick={() => openEditResident(resident)}>Edit</button>
+                      {flatResidents.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {flatResidents.map(r => (
+                            <div key={r.id}>
+                              <div style={{ fontWeight: 500 }}>{r.name}</div>
+                              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.type} · {r.phone}</div>
+                              <button className="btn btn-xs btn-outline" style={{ marginTop: 2 }} onClick={() => openEditResident(r)}>Edit</button>
+                            </div>
+                          ))}
+                          <button className="btn btn-xs btn-success" style={{ alignSelf: 'flex-start' }} onClick={() => openAddResident(f)}>+ Add</button>
                         </div>
                       ) : (
                         <button className="btn btn-xs btn-success" onClick={() => openAddResident(f)}>+ Add Resident</button>
@@ -183,6 +210,9 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
                   </tr>
                 );
               })}
+              {filtered.length === 0 && (
+                <tr><td colSpan={8} className="text-center" style={{ padding: 28, color: 'var(--text-muted)' }}>No flats found</td></tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -190,126 +220,138 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
 
       {/* Add Flat Modal */}
       <Modal show={showAddFlat} onClose={() => setShowAddFlat(false)} title="Add Flat"
-        footer={<><button className="btn btn-outline" onClick={() => setShowAddFlat(false)}>Cancel</button><button className="btn btn-primary" onClick={addFlat}>Add Flat</button></>}>
+        footer={<><button className="btn btn-outline" onClick={() => setShowAddFlat(false)}>Cancel</button><button className="btn btn-primary" onClick={addFlat} disabled={saving}>{saving ? 'Adding…' : 'Add Flat'}</button></>}>
         {flatError && <div className="form-error" role="alert">{flatError}</div>}
-        <div className="form-group">
-          <label htmlFor="flat-building">Building</label>
-          <select id="flat-building" className="form-control" value={flatForm.buildingId} onChange={e => setFlatForm({ ...flatForm, buildingId: e.target.value })}>
-            <option value="">Select Building</option>
-            {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-          </select>
-        </div>
-        <div className="form-row">
+        <form onSubmit={addFlat}>
           <div className="form-group">
-            <label htmlFor="flat-number">Flat Number</label>
-            <input id="flat-number" className="form-control" value={flatForm.flatNumber} onChange={e => setFlatForm({ ...flatForm, flatNumber: e.target.value })} placeholder="e.g. D-301" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="flat-floor">Floor</label>
-            <input id="flat-floor" className="form-control" type="number" value={flatForm.floor} onChange={e => setFlatForm({ ...flatForm, floor: e.target.value })} />
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="flat-type">Type</label>
-            <select id="flat-type" className="form-control" value={flatForm.type} onChange={e => setFlatForm({ ...flatForm, type: e.target.value })}>
-              <option>1BHK</option><option>2BHK</option><option>3BHK</option><option>4BHK</option><option>Studio</option>
+            <label htmlFor="flat-building">Building <span className="required">*</span></label>
+            <select id="flat-building" className="form-control" value={flatForm.buildingId} onChange={e => setFlatForm({ ...flatForm, buildingId: e.target.value })} autoFocus>
+              <option value="">Select building…</option>
+              {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           </div>
-          <div className="form-group">
-            <label htmlFor="flat-area">Area (sqft)</label>
-            <input id="flat-area" className="form-control" type="number" value={flatForm.area} onChange={e => setFlatForm({ ...flatForm, area: e.target.value })} />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="flat-number">Flat Number <span className="required">*</span></label>
+              <input id="flat-number" className="form-control" value={flatForm.flatNumber} onChange={e => setFlatForm({ ...flatForm, flatNumber: e.target.value })} placeholder="e.g. A-101, B-302" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="flat-floor">Floor <span className="required">*</span></label>
+              <input id="flat-floor" className="form-control" type="number" min="0" max="100" value={flatForm.floor} onChange={e => setFlatForm({ ...flatForm, floor: e.target.value })} placeholder="e.g. 3" />
+            </div>
           </div>
-        </div>
-        <hr className="form-divider" />
-        <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Owner Details (optional)</p>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="flat-owner-name">Owner Name</label>
-            <input id="flat-owner-name" className="form-control" value={flatForm.ownerName} onChange={e => setFlatForm({ ...flatForm, ownerName: e.target.value })} />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="flat-type">Type</label>
+              <select id="flat-type" className="form-control" value={flatForm.type} onChange={e => setFlatForm({ ...flatForm, type: e.target.value })}>
+                <option>1BHK</option><option>2BHK</option><option>3BHK</option><option>4BHK</option><option>Studio</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="flat-area">Area (sqft)</label>
+              <input id="flat-area" className="form-control" type="number" min="0" step="1" value={flatForm.area} onChange={e => setFlatForm({ ...flatForm, area: e.target.value })} placeholder="e.g. 1200" />
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="flat-owner-mobile">Owner Mobile</label>
-            <input id="flat-owner-mobile" className="form-control" value={flatForm.ownerMobile} onChange={e => setFlatForm({ ...flatForm, ownerMobile: e.target.value })} placeholder="9876543210" />
+          <hr className="form-divider" />
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Owner Details (optional)</p>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="flat-owner-name">Owner Name</label>
+              <input id="flat-owner-name" className="form-control" value={flatForm.ownerName} onChange={e => setFlatForm({ ...flatForm, ownerName: e.target.value })} placeholder="e.g. Ramesh Kumar" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="flat-owner-mobile">Owner Mobile</label>
+              <input id="flat-owner-mobile" className="form-control" type="tel" inputMode="tel" value={flatForm.ownerMobile} onChange={e => setFlatForm({ ...flatForm, ownerMobile: e.target.value })} placeholder="e.g. 9876543210" />
+            </div>
           </div>
-        </div>
+          <button type="submit" hidden />
+        </form>
       </Modal>
 
       {/* Add Resident Modal */}
       <Modal show={showAddResident} onClose={() => setShowAddResident(false)} title={`Add Resident — ${selectedFlat?.flatNumber}`}
-        footer={<><button className="btn btn-outline" onClick={() => setShowAddResident(false)}>Cancel</button><button className="btn btn-primary" onClick={addResident}>Add</button></>}>
+        footer={<><button className="btn btn-outline" onClick={() => setShowAddResident(false)}>Cancel</button><button className="btn btn-primary" onClick={addResident} disabled={saving}>{saving ? 'Adding…' : 'Add'}</button></>}>
         {residentError && <div className="form-error" role="alert">{residentError}</div>}
-        <div className="form-group">
-          <label htmlFor="add-resident-name">Name</label>
-          <input id="add-resident-name" className="form-control" value={residentForm.name} onChange={e => setResidentForm({ ...residentForm, name: e.target.value })} />
-        </div>
-        <div className="form-row">
+        <form onSubmit={addResident}>
           <div className="form-group">
-            <label htmlFor="add-resident-phone">Phone</label>
-            <input id="add-resident-phone" className="form-control" value={residentForm.phone} onChange={e => setResidentForm({ ...residentForm, phone: e.target.value })} />
+            <label htmlFor="add-resident-name">Name <span className="required">*</span></label>
+            <input id="add-resident-name" className="form-control" value={residentForm.name} onChange={e => setResidentForm({ ...residentForm, name: e.target.value })} placeholder="Full name" autoFocus />
           </div>
-          <div className="form-group">
-            <label htmlFor="add-resident-email">Email</label>
-            <input id="add-resident-email" className="form-control" value={residentForm.email} onChange={e => setResidentForm({ ...residentForm, email: e.target.value })} />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="add-resident-phone">Phone <span className="required">*</span></label>
+              <input id="add-resident-phone" className="form-control" type="tel" inputMode="tel" value={residentForm.phone} onChange={e => setResidentForm({ ...residentForm, phone: e.target.value })} placeholder="e.g. 9876543210" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="add-resident-email">Email</label>
+              <input id="add-resident-email" className="form-control" type="email" value={residentForm.email} onChange={e => setResidentForm({ ...residentForm, email: e.target.value })} placeholder="e.g. name@email.com" />
+            </div>
           </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="add-resident-type">Type</label>
-            <select id="add-resident-type" className="form-control" value={residentForm.type} onChange={e => setResidentForm({ ...residentForm, type: e.target.value })}>
-              <option>Owner</option><option>Tenant</option>
-            </select>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="add-resident-type">Type</label>
+              <select id="add-resident-type" className="form-control" value={residentForm.type} onChange={e => setResidentForm({ ...residentForm, type: e.target.value })}>
+                <option>Owner</option><option>Tenant</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="add-resident-movein">Move-in Date</label>
+              <input id="add-resident-movein" className="form-control" type="date" value={residentForm.moveInDate} onChange={e => setResidentForm({ ...residentForm, moveInDate: e.target.value })} />
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="add-resident-movein">Move-in Date</label>
-            <input id="add-resident-movein" className="form-control" type="date" value={residentForm.moveInDate} onChange={e => setResidentForm({ ...residentForm, moveInDate: e.target.value })} />
-          </div>
-        </div>
+          <button type="submit" hidden />
+        </form>
       </Modal>
 
       {/* Edit Resident Modal */}
       <Modal show={!!showEditResident} onClose={() => setShowEditResident(null)} title="Edit Resident"
-        footer={<><button className="btn btn-outline" onClick={() => setShowEditResident(null)}>Cancel</button><button className="btn btn-primary" onClick={saveEditResident}>Save</button></>}>
+        footer={<><button className="btn btn-outline" onClick={() => setShowEditResident(null)}>Cancel</button><button className="btn btn-primary" onClick={saveEditResident} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button></>}>
         {residentError && <div className="form-error" role="alert">{residentError}</div>}
-        <div className="form-group">
-          <label htmlFor="edit-resident-name">Name</label>
-          <input id="edit-resident-name" className="form-control" value={residentForm.name} onChange={e => setResidentForm({ ...residentForm, name: e.target.value })} />
-        </div>
-        <div className="form-row">
+        <form onSubmit={saveEditResident}>
           <div className="form-group">
-            <label htmlFor="edit-resident-phone">Phone</label>
-            <input id="edit-resident-phone" className="form-control" value={residentForm.phone} onChange={e => setResidentForm({ ...residentForm, phone: e.target.value })} />
+            <label htmlFor="edit-resident-name">Name <span className="required">*</span></label>
+            <input id="edit-resident-name" className="form-control" value={residentForm.name} onChange={e => setResidentForm({ ...residentForm, name: e.target.value })} autoFocus />
           </div>
-          <div className="form-group">
-            <label htmlFor="edit-resident-email">Email</label>
-            <input id="edit-resident-email" className="form-control" value={residentForm.email} onChange={e => setResidentForm({ ...residentForm, email: e.target.value })} />
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="edit-resident-phone">Phone <span className="required">*</span></label>
+              <input id="edit-resident-phone" className="form-control" type="tel" inputMode="tel" value={residentForm.phone} onChange={e => setResidentForm({ ...residentForm, phone: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="edit-resident-email">Email</label>
+              <input id="edit-resident-email" className="form-control" type="email" value={residentForm.email} onChange={e => setResidentForm({ ...residentForm, email: e.target.value })} />
+            </div>
           </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="edit-resident-type">Type</label>
-            <select id="edit-resident-type" className="form-control" value={residentForm.type} onChange={e => setResidentForm({ ...residentForm, type: e.target.value })}>
-              <option>Owner</option><option>Tenant</option>
-            </select>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="edit-resident-type">Type</label>
+              <select id="edit-resident-type" className="form-control" value={residentForm.type} onChange={e => setResidentForm({ ...residentForm, type: e.target.value })}>
+                <option>Owner</option><option>Tenant</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="edit-resident-movein">Move-in Date</label>
+              <input id="edit-resident-movein" className="form-control" type="date" value={residentForm.moveInDate} onChange={e => setResidentForm({ ...residentForm, moveInDate: e.target.value })} />
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="edit-resident-movein">Move-in Date</label>
-            <input id="edit-resident-movein" className="form-control" type="date" value={residentForm.moveInDate} onChange={e => setResidentForm({ ...residentForm, moveInDate: e.target.value })} />
-          </div>
-        </div>
+          <button type="submit" hidden />
+        </form>
       </Modal>
 
       {/* Edit Owner Modal */}
       <Modal show={!!showEditOwner} onClose={() => setShowEditOwner(null)} title={`Owner Details — ${showEditOwner?.flatNumber}`}
-        footer={<><button className="btn btn-outline" onClick={() => setShowEditOwner(null)}>Cancel</button><button className="btn btn-primary" onClick={saveOwner}>Save</button></>}>
-        <div className="form-group">
-          <label htmlFor="edit-owner-name">Owner Name</label>
-          <input id="edit-owner-name" className="form-control" value={ownerForm.ownerName} onChange={e => setOwnerForm({ ...ownerForm, ownerName: e.target.value })} />
-        </div>
-        <div className="form-group">
-          <label htmlFor="edit-owner-mobile">Owner Mobile</label>
-          <input id="edit-owner-mobile" className="form-control" value={ownerForm.ownerMobile} onChange={e => setOwnerForm({ ...ownerForm, ownerMobile: e.target.value })} placeholder="9876543210" />
-        </div>
+        footer={<><button className="btn btn-outline" onClick={() => setShowEditOwner(null)}>Cancel</button><button className="btn btn-primary" onClick={saveOwner} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button></>}>
+        <form onSubmit={saveOwner}>
+          <div className="form-group">
+            <label htmlFor="edit-owner-name">Owner Name</label>
+            <input id="edit-owner-name" className="form-control" value={ownerForm.ownerName} onChange={e => setOwnerForm({ ...ownerForm, ownerName: e.target.value })} placeholder="Full name" autoFocus />
+          </div>
+          <div className="form-group">
+            <label htmlFor="edit-owner-mobile">Owner Mobile</label>
+            <input id="edit-owner-mobile" className="form-control" type="tel" inputMode="tel" value={ownerForm.ownerMobile} onChange={e => setOwnerForm({ ...ownerForm, ownerMobile: e.target.value })} placeholder="e.g. 9876543210" />
+          </div>
+          <button type="submit" hidden />
+        </form>
       </Modal>
 
       {/* Payment Statement Modal */}
@@ -346,9 +388,12 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
                   <thead>
                     <tr><th>Month</th><th>Type</th><th>Amount</th><th>Pending Dues</th><th>Total Due</th><th>Status / Ref</th></tr>
                   </thead>
-                  <tbody>
-                    {flatBills.length === 0 && <tr><td colSpan={6} className="text-center" style={{ padding: 20, color: 'var(--text-muted)' }}>No bills generated</td></tr>}
-                    {flatBills.map(bill => {
+                  {flatBills.length === 0 ? (
+                    <tbody>
+                      <tr><td colSpan={6} className="text-center" style={{ padding: 20, color: 'var(--text-muted)' }}>No bills generated</td></tr>
+                    </tbody>
+                  ) : (
+                    flatBills.map(bill => {
                       const billPayments = flatPayments.filter(p => p.billId === bill.id);
                       return (
                         <tbody key={bill.id}>
@@ -374,8 +419,8 @@ export default function FlatsResidents({ societyId, buildings, flats, setFlats, 
                           ))}
                         </tbody>
                       );
-                    })}
-                  </tbody>
+                    })
+                  )}
                 </table>
               </div>
             </div>

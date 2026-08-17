@@ -6,18 +6,23 @@ export default function Modal({ show, onClose, title, children, footer, large })
   const titleId = useId();
   const modalRef = useRef(null);
   const previouslyFocused = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!show) return;
 
     previouslyFocused.current = document.activeElement;
-    if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
+    const firstInput = modalRef.current?.querySelector('input, textarea, select');
+    if (firstInput) {
+      firstInput.focus();
+    } else if (modalRef.current && !modalRef.current.contains(document.activeElement)) {
       modalRef.current.focus();
     }
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== 'Tab' || !modalRef.current) return;
@@ -41,12 +46,12 @@ export default function Modal({ show, onClose, title, children, footer, large })
       document.removeEventListener('keydown', handleKeyDown);
       previouslyFocused.current?.focus?.();
     };
-  }, [show, onClose]);
+  }, [show]);
 
   if (!show) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onCloseRef.current}>
       <div
         className={`modal ${large ? 'modal-lg' : ''}`}
         role="dialog"
